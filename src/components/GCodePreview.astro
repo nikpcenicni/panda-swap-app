@@ -1,0 +1,34 @@
+---
+interface Props {
+  gcode: string;
+}
+
+const { gcode } = Astro.props;
+---
+
+<div class="w-full h-64 relative" id="preview-container">
+  <canvas id="gcode-preview" class="w-full h-full bg-gray-100 dark:bg-gray-800"></canvas>
+</div>
+
+<script define:vars={{ gcode }}>
+  import * as GCodePreview from 'gcode-preview';
+
+  // Initialize preview when component mounts
+  const canvas = document.getElementById('gcode-preview');
+  if (canvas instanceof HTMLCanvasElement) {
+    const preview = GCodePreview.init({
+      canvas,
+      extrusionColor: '#3b82f6', // blue-500
+      backgroundColor: '#111827', // gray-900
+      initialCameraPosition: [0, -200, 200],
+      buildVolume: {
+        x: 220,
+        y: 220,
+        z: 250
+      }
+    });
+
+    // Load the GCODE
+    preview.processGCode(gcode);
+  }
+</script>

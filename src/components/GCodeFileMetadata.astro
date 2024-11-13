@@ -1,44 +1,64 @@
 ---
-import Card from '../components/Card.astro'
+import Card from './Card.astro';
+import GCodePreview from './GCodePreview.astro';
+
 interface Props {
   plateName: string;
   colors: Array<{ color: string; weight: number }>;
   totalTime: number;
-  modelImage?: string;
+  estimatedTime: number;
+  gcode: string;
 }
 
-const { plateName, colors, totalTime, modelImage } = Astro.props;
+const { plateName, colors, totalTime, estimatedTime, gcode } = Astro.props;
+
+function formatTime(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  return `${hours}h ${mins}m`;
+}
 ---
 
 <Card title={plateName}>
-  {modelImage && (
-    <div class="mb-4">
-      <img
-        src={modelImage}
-        alt={`Preview of ${plateName}`}
-        class="w-full h-48 object-contain rounded-lg"
-      />
-    </div>
-  )}
+  <div class="mb-6">
+    <GCodePreview gcode={gcode} />
+  </div>
   
   <div class="space-y-4">
     <div>
-      <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Colors Used:</h4>
-      <ul class="space-y-1">
-        {colors.map(({ color, weight }) => (
-          <li class="flex justify-between text-gray-600 dark:text-gray-400">
-            <span>{color}</span>
-            <span>{weight.toFixed(2)}g</span>
-          </li>
-        ))}
-      </ul>
+        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Colors Used:</h4>
+        <ul class="space-y-2">
+          {colors.map(({ color, weight }) => (
+            <li class="flex items-center justify-between text-gray-600 dark:text-gray-400">
+              <div class="flex items-center gap-2">
+                <div 
+                  class="w-6 h-6 rounded border border-gray-200 dark:border-gray-600" 
+                  style={`background-color: ${color}`}
+                />
+                <span>{color}</span>
+              </div>
+              <span>{weight.toFixed(2)}g</span>
+            </li>
+          ))}
+        </ul>
     </div>
     
-    <div>
-      <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Print Time:</h4>
-      <p class="text-gray-600 dark:text-gray-400">
-        {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
-      </p>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Print Time:</h4>
+        <p class="text-gray-600 dark:text-gray-400">
+          {formatTime(totalTime)}
+        </p>
+      </div>
+      <div>
+        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Total Time:</h4>
+        <p class="text-gray-600 dark:text-gray-400">
+          {formatTime(estimatedTime)}
+        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          (includes setup)
+        </p>
+      </div>
     </div>
   </div>
 </Card>

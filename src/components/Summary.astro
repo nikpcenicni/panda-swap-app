@@ -1,65 +1,265 @@
 ---
-import Card from '../components/Card.astro'
-import GCodeFileMetatdata from '../components/GCodeFileMetadata.astro'
+import Card from './Card.astro';
+import GCodeFileMetadata from './GCodeFileMetadata.astro';
+import { filesStore } from '../store/fileStore';
 
-interface Props {
-    files: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      metadata: {
-        plateName: string;
-        colors: Array<{ color: string; weight: number }>;
-        totalTime: number;
-        modelImage?: string;
-      };
-    }>;
+interface Color {
+  color: string;
+  weight: number;
+}
+
+interface FileMetadata {
+  plateName: string;
+  colors: Color[];
+  totalTime: number;
+  estimatedTime: number;
+}
+
+interface GCodeFile {
+  id: string;
+  quantity: number;
+  content: string;
+  metadata: FileMetadata;
+}
+
+const initialFiles: readonly GCodeFile[] = filesStore.get();
+---
+
+<div id="file-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+  {initialFiles.map((file) => (
+    <div 
+      class="file-item bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 transition-all duration-200"
+      data-file-id={file.id}
+    >
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col gap-1">
+          <label 
+            for={`quantity-${file.id}`} 
+            class="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            Print Quantity
+          </label>
+          <input
+            id={`quantity-${file.id}`}
+            type="number"
+            min="1"
+            value={file.quantity}
+            data-file-id={file.id}
+            class="w-24 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+        <button
+          class="drag-handle p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-grab active:cursor-grabbing"
+          title="Drag to reorder"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+          </svg>
+        </button>
+      </div>
+      <GCodeFileMetadata 
+        plateName={file.metadata.plateName}
+        colors={file.metadata.colors}
+        totalTime={file.metadata.totalTime}
+        estimatedTime={file.metadata.estimatedTime}
+        gcode={file.content}
+      />
+    </div>
+  ))}
+</div>
+
+<script>
+  import { filesStore } from '../store/fileStore';
+  import Sortable from 'sortablejs';
+  import * as GCodePreview from 'gcode-preview';
+
+  interface GCodePreviewOptions {
+    canvas: HTMLCanvasElement;
+    extrusionColor: string;
+    backgroundColor: string;
+    initialCameraPosition: [number, number, number];
+    buildVolume: {
+      x: number;
+      y: number;
+      z: number;
+    };
+  }
+
+  async function initializeGCodePreview(container: HTMLElement, gcode: string): Promise<void> {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg';
+    container.appendChild(canvas);
+
+    const preview = GCodePreview.init({
+      canvas,
+      extrusionColor: '#3b82f6',
+      backgroundColor: '#111827',
+      initialCameraPosition: [0, -200, 200],
+      buildVolume: {
+        x: 220,
+        y: 220,
+        z: 250
+      }
+    } as GCodePreviewOptions);
+
+    await preview.processGCode(gcode);
+  }
+
+  function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
+    const fileList = document.getElementById('file-list');
+    if (!fileList) return;
+
+    fileList.innerHTML = files.map(file => `
+      <div 
+        class="file-item bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 transition-all duration-200"
+        data-file-id="${file.id}"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex flex-col gap-1">
+            <label 
+              for="quantity-${file.id}" 
+              class="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Print Quantity
+            </label>
+            <input
+              id="quantity-${file.id}"
+              type="number"
+              min="1"
+              value="${file.quantity}"
+              data-file-id="${file.id}"
+              class="w-24 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <button
+            class="drag-handle p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-grab active:cursor-grabbing"
+            title="Drag to reorder"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+            </svg>
+          </button>
+        </div>
+        <div class="gcode-preview-container" data-gcode="${encodeURIComponent(file.content)}"></div>
+        <div class="mt-4">
+          <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">File: ${file.metadata.plateName}</h4>
+          <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Colors Used:</h4>
+          <ul class="space-y-2">
+            ${file.metadata.colors.map(({ color, weight }) => `
+              <li class="flex items-center justify-between text-gray-600 dark:text-gray-400">
+                <div class="flex items-center gap-2">
+                  <div 
+                    class="w-6 h-6 rounded border border-gray-200 dark:border-gray-600" 
+                    style="background-color: ${color}"
+                  ></div>
+                  <span>${color}</span>
+                </div>
+                <span>${weight.toFixed(2)}g</span>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="mt-2 grid grid-cols-2 gap-4">
+            <div>
+              <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Print Time:</h4>
+              <p class="text-gray-600 dark:text-gray-400">
+                ${Math.floor(file.metadata.totalTime / 60)}h ${Math.round(file.metadata.totalTime % 60)}m
+              </p>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Total Time:</h4>
+              <p class="text-gray-600 dark:text-gray-400">
+                ${Math.floor(file.metadata.estimatedTime / 60)}h ${Math.round(file.metadata.estimatedTime % 60)}m
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Initialize GCodePreview for each container
+    document.querySelectorAll('.gcode-preview-container').forEach(container => {
+      const encodedGcode = container.getAttribute('data-gcode');
+      if (!encodedGcode) return;
+      
+      const gcode = decodeURIComponent(encodedGcode);
+      initializeGCodePreview(container as HTMLElement, gcode).catch(console.error);
+    });
+
+    initializeSortable();
   }
   
-  const { files } = Astro.props;
-  
-  // Calculate total filament usage by color
-  const totalFilamentByColor = files.reduce((acc, file) => {
-    file.metadata.colors.forEach(({ color, weight }) => {
-      acc[color] = (acc[color] || 0) + weight * file.quantity;
-    });
-    return acc;
-  }, {} as Record<string, number>);
-  ---
-  
-  <Card title="Print Summary" className="mb-8">
-    <!-- Previous template code remains the same -->
-  </Card>
-  
-  <div id="file-list" class="space-y-4">
-    <!-- Previous template code remains the same -->
-  </div>
-  
-  <button
-    id="merge-files"
-    class="w-full mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
-    disabled={files.length === 0}
-  >
-    Merge and Download Files
-  </button>
-  
-  <script>
-    // Import Sortable as a module
-    const Sortable = await import('sortablejs').then(m => m.default);
-    
+  function initializeSortable(): void {
     const fileList = document.getElementById('file-list');
-    if (fileList) {
-      new Sortable(fileList, {
-        handle: '[data-drag-handle]',
-        animation: 150,
-        onEnd: (evt) => {
-          const event = new CustomEvent('fileOrderChanged', {
-            detail: { oldIndex: evt.oldIndex, newIndex: evt.newIndex }
-          });
-          window.dispatchEvent(event);
-        }
-      });
+    if (!fileList) return;
+
+    // Remove any existing Sortable instance
+    const oldInstance = Sortable.get(fileList);
+    if (oldInstance) {
+      oldInstance.destroy();
     }
+
+    new Sortable(fileList, {
+      animation: 150,
+      handle: '.drag-handle',
+      draggable: '.file-item',
+      ghostClass: 'opacity-50',
+      chosenClass: 'opacity-60',
+      dragClass: 'shadow-2xl',
+      forceFallback: true,
+      fallbackClass: 'sortable-fallback',
+      fallbackOnBody: true,
+      swapThreshold: 0.65,
+      onStart: function (evt) {
+        document.body.style.cursor = 'grabbing';
+      },
+      onEnd: function (evt) {
+        document.body.style.cursor = 'default';
+        const files = [...filesStore.get()];
+        const newFiles = Array.from(evt.to.children).map((el) => {
+          const fileId = el.getAttribute('data-file-id');
+          return files.find(f => f.id === fileId)!;
+        });
+        filesStore.set(newFiles);
+      }
+    });
+  }
+
+  // Initialize subscription
+  filesStore.subscribe(updateFileList);
+
+  // Initialize Sortable on load
+  document.addEventListener('astro:page-load', () => {
+    initializeSortable();
+  });
+
+  // Handle quantity changes
+  document.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.matches('input[type="number"][data-file-id]')) {
+      const fileId = target.dataset.fileId;
+      const quantity = parseInt(target.value);
+      
+      if (fileId) {
+        const files = [...filesStore.get()];
+        const newFiles = files.map(file => 
+          file.id === fileId ? { ...file, quantity } : file
+        );
+        filesStore.set(newFiles);
+      }
+    }
+  });
+</script>
+
+<style is:global>
+  .sortable-fallback {
+    @apply pointer-events-none opacity-60;
+  }
   
-    // Rest of the script remains the same
-  </script>
+  .sortable-ghost {
+    @apply opacity-40 bg-blue-50 dark:bg-blue-900;
+  }
+
+  .sortable-drag {
+    @apply cursor-grabbing;
+  }
+</style>

@@ -1,14 +1,6 @@
 ---
-import Card from '../components/Card.astro'
-interface Props {
-  id?: string;
-  accept?: string;
-}
-
-const { 
-  id = "file-upload",
-  accept = ".gcode"
-} = Astro.props;
+import Card from './Card.astro';
+import { filesStore } from '../store/fileStore';
 ---
 
 <Card title="Upload GCODE Files">
@@ -18,8 +10,8 @@ const {
   >
     <input
       type="file"
-      id={id}
-      accept={accept}
+      id="file-input"
+      accept=".gcode"
       class="hidden"
       multiple
     />
@@ -50,8 +42,34 @@ const {
 </Card>
 
 <script>
+  import { filesStore } from '../store/fileStore';
+  import { parseGCodeFile } from '../utils/gcodeParser';
+
   const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('file-upload');
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+
+  async function handleFiles(fileList: FileList) {
+    const files = Array.from(fileList);
+    
+    for (const file of files) {
+      try {
+        const content = await file.text();
+        const metadata = parseGCodeFile(content, file.name); // Pass the filename
+        
+        const newFile = {
+          id: crypto.randomUUID(),
+          name: file.name,
+          content,
+          quantity: 1,
+          metadata
+        };
+        
+        filesStore.set([...filesStore.get(), newFile]);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+      }
+    }
+  }
 
   if (dropzone && fileInput) {
     dropzone.addEventListener('dragover', (e) => {
@@ -63,13 +81,12 @@ const {
       dropzone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
     });
 
-    dropzone.addEventListener('drop', (e) => {
+    dropzone.addEventListener('drop', async (e) => {
       e.preventDefault();
       dropzone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
       
       if (e.dataTransfer?.files) {
-        fileInput.files = e.dataTransfer.files;
-        handleFiles(e.dataTransfer.files);
+        await handleFiles(e.dataTransfer.files);
       }
     });
 
@@ -77,16 +94,11 @@ const {
       fileInput.click();
     });
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files) {
-        handleFiles(e.target.files);
+    fileInput.addEventListener('change', async (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files) {
+        await handleFiles(target.files);
       }
     });
-  }
-
-  function handleFiles(files: FileList) {
-    // Dispatch custom event with files
-    const event = new CustomEvent('gcodeFilesSelected', { detail: { files } });
-    window.dispatchEvent(event);
   }
 </script>
