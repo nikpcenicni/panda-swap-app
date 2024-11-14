@@ -2,6 +2,8 @@
 export interface Color {
     color: string;
     weight: number;
+    cost: number;
+    filament_type: string;
   }
   
   export interface FileMetadata {

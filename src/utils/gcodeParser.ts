@@ -3,6 +3,7 @@ interface Color {
   color: string;
   weight: number;
   cost: number;
+  filament_type: string;
 }
 
 interface FileMetadata {
@@ -76,20 +77,34 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
         .map(w => parseFloat(w.trim()));
     }
   }
-
-  // Combine colors with their weights and costs
+  // Parse filament type
+  const filamentTypeLine = lines.find(line => line.includes('; filament_type ='));
+  let filamentTypes: string[] = [];
+  if (filamentTypeLine) {
+    const filamentTypeMatch = filamentTypeLine.match(/; filament_type = (.*)/);
+    if (filamentTypeMatch) {
+      filamentTypes = filamentTypeMatch[1]
+        .split(';')
+        .map(w => w.trim());
+    }
+  }
+  
+  // Combine colors with their weights, costs, and filament types
   const colorData: Color[] = colors.map((color, index) => ({
     color: color.startsWith('#') ? color : `#${color}`,
     weight: weights[index] || 0,
-    cost: costs[index] || 0
+    cost: costs[index] || 0,
+    filament_type: filamentTypes[index] || "PLA"
   }));
+  
 
   // Ensure there are always 4 colors
   while (colorData.length < 4) {
     colorData.push({
       color: '#FFFFFF',
       weight: 0,
-      cost: 0
+      cost: 0,
+      filament_type: 'PLA'
     });
   }
 

@@ -6,6 +6,8 @@ import { filesStore } from '../store/fileStore';
 interface Color {
   color: string;
   weight: number;
+  cost: number;
+  filament_type: string;
 }
 
 interface FileMetadata {
@@ -25,7 +27,7 @@ interface GCodeFile {
 const initialFiles: readonly GCodeFile[] = filesStore.get();
 // Calculate initial totals across all files and quantities
 const initialTotals = initialFiles.reduce((acc, file) => {
-  file.metadata.colors.forEach(({ color, weight }) => {
+  file.metadata.colors.forEach(({ color, weight, cost, filament_type }) => {
     if (!acc[color]) {
       acc[color] = { weight: 0 };
     }
@@ -39,115 +41,116 @@ const totalTime = initialFiles.reduce((total, file) =>
 ---
 <!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Print Job Summary</h3>
-    <div class="grid grid-cols-1 gap-6">
-      <div>
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Total Print Time: {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
-        </h4>
-        <div class="space-y-2 mt-4" id="total-usage">
-        </div>
-      </div>
+  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Print Job Summary</h3>
+  <div class="grid grid-cols-1 gap-6">
+    <div>
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Total Print Time: {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
+      </h4>
+      <div class="space-y-2 mt-4" id="total-usage"></div>
     </div>
   </div>
+</div>
 
-  <script>
-    import { filesStore, type GCodeFile } from '../store/fileStore';
-    import tinycolor from 'tinycolor2';
+<script>
+  import { filesStore, type GCodeFile } from '../store/fileStore';
+  import tinycolor from 'tinycolor2';
 
-  
-    function updateSummary(files: readonly GCodeFile[]): void {
-  const totalUsageElement = document.getElementById('total-usage');
-  if (!totalUsageElement) return;
+  function updateSummary(files: readonly GCodeFile[]): void {
+    const totalUsageElement = document.getElementById('total-usage');
+    if (!totalUsageElement) return;
 
-  // Calculate totals per color across all files
-  const totals = files.reduce((acc, file) => {
-    file.metadata.colors.forEach(({ color, weight, cost }, index) => {
-      const slotKey = `Slot ${index + 1}`;
-      if (!acc[slotKey]) {
-        acc[slotKey] = { color, weight: 0, cost: 0 };
-      }
-      acc[slotKey].weight += weight * file.quantity;
-      acc[slotKey].cost += cost * file.quantity;
-    });
-    return acc;
-  }, {} as Record<string, { color: string; weight: number; cost: number; }>);
+    // Calculate totals per color across all files
+    const totals = files.reduce((acc, file) => {
+      file.metadata.colors.forEach(({ color, weight, cost, filament_type }, index) => {
+        const slotKey = `Slot ${index + 1}`;
+        if (!acc[slotKey]) {
+          acc[slotKey] = { color, weight: 0, cost: 0, filament_type };
+        }
+        acc[slotKey].weight += weight * file.quantity;
+        acc[slotKey].cost += cost * file.quantity;
+      });
+      return acc;
+    }, {} as Record<string, { color: string; weight: number; cost: number; filament_type: string; }>);
 
-  // Calculate total print time
-  const totalTime = files.reduce((total, file) =>
-    total + (file.metadata.estimatedTime * file.quantity), 0);
+    // Calculate total print time
+    const totalTime = files.reduce((total, file) =>
+      total + (file.metadata.estimatedTime * file.quantity), 0);
 
-  // Update the summary HTML
-  totalUsageElement.innerHTML = Object.entries(totals)
-    .map(([slotKey, { color, weight, cost }]) => {
-      const tc = tinycolor(color);
-      const displayColor = tc.toString('hex');
-      const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
-      return `
-        <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
-          <div class="flex items-center gap-3">
-            <div class="relative group">
-              <div
-                class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
-                style="background-color: ${displayColor}; color: ${textColor}"
-              >
-                <span class="opacity-0 group-hover:opacity-100 transition-opacity">
+    // Update the summary HTML
+    totalUsageElement.innerHTML = Object.entries(totals)
+      .map(([slotKey, { color, weight, cost, filament_type }]) => {
+        const tc = tinycolor(color);
+        const displayColor = tc.toString('hex');
+        const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
+        return `
+          <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+            <div class="flex items-center gap-3">
+              <div class="relative group">
+                <div
+                  class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
+                  style="background-color: ${displayColor}; color: ${textColor}"
+                >
+                  <span class="opacity-0 group-hover:opacity-100 transition-opacity">
+                    ${displayColor}
+                  </span>
+                </div>
+                <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
                   ${displayColor}
-                </span>
+                </div>
               </div>
-              <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                ${displayColor}
+              <div>
+                <span class="font-medium">${slotKey}</span>
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                  ${filament_type}
+                </div>
               </div>
-            </div>
-            <div>
-              <span class="font-medium">${slotKey}</span>
-              <div class="text-sm text-gray-600 dark:text-gray-300">
-                Weight: ${weight.toFixed(2)}g
-              </div>
-              <div class="text-sm text-gray-600 dark:text-gray-300">
-                Cost: $${cost.toFixed(2)}
+              <div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                  Weight: ${weight.toFixed(2)}g
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                  Cost: $${cost.toFixed(2)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      `;
-    })
-    .join('');
+        `;
+      })
+      .join('');
 
-  // Update total time
-  const hours = Math.floor(totalTime / 60);
-  const minutes = Math.round(totalTime % 60);
-  const totalTimeElement = document.querySelector('#print-summary h4');
-  if (totalTimeElement) {
-    totalTimeElement.textContent = `Total Print Time: ${hours}h ${minutes}m`;
-  }
-}
-  
-  
-    function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
-      updateSummary(files);
+    // Update total time
+    const hours = Math.floor(totalTime / 60);
+    const minutes = Math.round(totalTime % 60);
+    const totalTimeElement = document.querySelector('#print-summary h4');
+    if (totalTimeElement) {
+      totalTimeElement.textContent = `Total Print Time: ${hours}h ${minutes}m`;
     }
-    
+  }
 
-  
-    // Initialize subscription
-    filesStore.subscribe(updateFileList);
-  
+  function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
+    updateSummary(files);
+  }
+
+  // Initialize subscription
+  filesStore.subscribe(updateFileList);
+
   // Handle quantity changes
-    document.addEventListener('change', (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (target.matches('input[type="number"][data-file-id]')) {
-        const fileId = target.dataset.fileId;
-        const quantity = parseInt(target.value);
-        
-        if (fileId) {
-          const files = [...filesStore.get()];
-          const newFiles = files.map(file => 
-            file.id === fileId ? { ...file, quantity } : file
-          );
-          filesStore.set(newFiles);
-        }
+  document.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.matches('input[type="number"][data-file-id]')) {
+      const fileId = target.dataset.fileId;
+      const quantity = parseInt(target.value);
+      
+      if (fileId) {
+        const files = [...filesStore.get()];
+        const newFiles = files.map(file => 
+          file.id === fileId ? { ...file, quantity } : file
+        );
+        filesStore.set(newFiles);
       }
-    });
-    filesStore.subscribe(updateFileList);
-  </script>
+    }
+  });
+
+  filesStore.subscribe(updateFileList);
+</script>
