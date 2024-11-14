@@ -23,33 +23,7 @@ interface GCodeFile {
 }
 
 const initialFiles: readonly GCodeFile[] = filesStore.get();
-// Calculate initial totals across all files and quantities
-const initialTotals = initialFiles.reduce((acc, file) => {
-  file.metadata.colors.forEach(({ color, weight }) => {
-    if (!acc[color]) {
-      acc[color] = { weight: 0 };
-    }
-    acc[color].weight += weight * file.quantity;
-  });
-  return acc;
-}, {} as Record<string, { weight: number; }>);
-
-const totalTime = initialFiles.reduce((total, file) => 
-  total + (file.metadata.estimatedTime * file.quantity), 0);
 ---
-<!-- Summary Card -->
-<div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Print Job Summary</h3>
-    <div class="grid grid-cols-1 gap-6">
-      <div>
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Total Print Time: {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
-        </h4>
-        <div class="space-y-2 mt-4" id="total-usage">
-        </div>
-      </div>
-    </div>
-  </div>
 <!-- File List -->
 <div id="file-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
     {initialFiles.map((file) => (
@@ -169,68 +143,7 @@ const totalTime = initialFiles.reduce((total, file) =>
     return (yiq >= 128) ? '#000000' : '#FFFFFF';
   }
 
-  function updateSummary(files: readonly GCodeFile[]): void {
-    const totalUsageElement = document.getElementById('total-usage');
-    if (!totalUsageElement) return;
-
-    // Calculate totals per color across all files
-    const totals = files.reduce((acc, file) => {
-      file.metadata.colors.forEach(({ color, weight }) => {
-        if (!acc[color]) {
-          acc[color] = { weight: 0 };
-        }
-        acc[color].weight += weight * file.quantity;
-      });
-      return acc;
-    }, {} as Record<string, { weight: number; }>);
-
-    // Calculate total print time
-    const totalTime = files.reduce((total, file) => 
-      total + (file.metadata.estimatedTime * file.quantity), 0);
-
-    // Update the summary HTML
-    totalUsageElement.innerHTML = Object.entries(totals)
-      .filter(([_, { weight }]) => weight > 0)
-      .map(([color, { weight }]) => {
-        const tc = tinycolor(color);
-        const displayColor = tc.toString('hex');
-        const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
-        
-        return `
-          <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
-            <div class="flex items-center gap-3">
-              <div class="relative group">
-                <div
-                  class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
-                  style="background-color: ${displayColor}; color: ${textColor}"
-                >
-                  <span class="opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${displayColor}
-                  </span>
-                </div>
-                <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                  ${displayColor}
-                </div>
-              </div>
-            </div>
-            <span class="text-sm text-gray-600 dark:text-gray-300">${weight.toFixed(2)}g</span>
-          </div>
-        `;
-      })
-      .join('');
-
-    // Update total time
-    const hours = Math.floor(totalTime / 60);
-    const minutes = Math.round(totalTime % 60);
-    const totalTimeElement = document.querySelector('#print-summary h4');
-    if (totalTimeElement) {
-      totalTimeElement.textContent = `Total Print Time: ${hours}h ${minutes}m`;
-    }
-  }
-
-
   function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
-    updateSummary(files);
     const fileList = document.getElementById('file-list');
     if (!fileList) return;
 

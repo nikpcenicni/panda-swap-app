@@ -3,7 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import FileUpload from '../components/FileUpload.astro';
 import Summary from '../components/Summary.astro';
-
+import PrintSummary from '../components/PrintSummary.astro';
+import FileList from '../components/FileList.astro';
 // This would normally come from your data store/backend
 const files: { id: string; name: string; quantity: number; metadata: { plateName: string; colors: Array<{ color: string; weight: number; }>; totalTime: number; modelImage?: string; }; }[] = [];
 ---
@@ -12,6 +13,7 @@ const files: { id: string; name: string; quantity: number; metadata: { plateName
   <Header />
   <main class="container mx-auto px-4 py-8 space-y-8">
     <FileUpload />
-    <Summary files={files} />
+    <PrintSummary files={files} />
+    <FileList file={files}/>
   </main>
 </Layout>

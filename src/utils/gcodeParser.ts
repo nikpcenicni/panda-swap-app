@@ -1,5 +1,4 @@
 // src/utils/gcodeParser.ts
-
 interface Color {
   color: string;
   weight: number;
@@ -16,14 +15,13 @@ interface FileMetadata {
 
 export function parseGCodeFile(content: string, fileName: string): FileMetadata {
   const lines = content.split('\n');
-  
+
   // Extract print times from header
   const printTimeLine = lines.find(line =>
     line.includes('; model printing time:') && line.includes('total estimated time:')
   );
   let modelPrintTime = 0;
   let totalEstimatedTime = 0;
-  
   if (printTimeLine) {
     // Parse model printing time
     const modelMatch = printTimeLine.match(/model printing time: (\d+)h (\d+)m (\d+)s/);
@@ -31,7 +29,6 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
       const [_, hours, minutes, seconds] = modelMatch;
       modelPrintTime = (parseInt(hours) * 60) + parseInt(minutes) + (parseInt(seconds) / 60);
     }
-    
     // Parse total estimated time
     const totalMatch = printTimeLine.match(/total estimated time: (\d+)h (\d+)m (\d+)s/);
     if (totalMatch) {
@@ -67,6 +64,7 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
         .map(w => parseFloat(w.trim()));
     }
   }
+
   // Parse filament costs
   const costLine = lines.find(line => line.includes('; filament cost ='));
   let costs: number[] = [];
@@ -79,21 +77,22 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
     }
   }
 
-  // Combine colors with their weights, ensuring colors that weren't used (weight = 0) are filtered out
+  // Combine colors with their weights and costs
   const colorData: Color[] = colors.map((color, index) => ({
     color: color.startsWith('#') ? color : `#${color}`,
     weight: weights[index] || 0,
     cost: costs[index] || 0
-  })).filter(c => c.weight > 0);
+  }));
 
-  // Provide default if no colors found or all weights were 0
-  if (colorData.length === 0) {
+  // Ensure there are always 4 colors
+  while (colorData.length < 4) {
     colorData.push({
       color: '#FFFFFF',
       weight: 0,
       cost: 0
     });
   }
+
   console.log(colorData);
 
   return {
