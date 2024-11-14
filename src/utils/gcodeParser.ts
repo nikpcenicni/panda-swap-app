@@ -12,6 +12,7 @@ interface FileMetadata {
   totalTime: number;
   estimatedTime: number;
   modelImage?: string;
+  printerModel: string;
 }
 
 export function parseGCodeFile(content: string, fileName: string): FileMetadata {
@@ -35,6 +36,18 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
     if (totalMatch) {
       const [_, hours, minutes, seconds] = totalMatch;
       totalEstimatedTime = (parseInt(hours) * 60) + parseInt(minutes) + (parseInt(seconds) / 60);
+    }
+  }
+
+  // Extract printer model from header
+  const printerModelMatch = lines.find(line => line.includes('; printer_model =') );
+  // Parse filament weights
+  const printerModelLine = lines.find(line => line.includes('; printer_model ='));
+  let printerModel: string = "";
+  if (printerModelLine) {
+    const printerModelMatch = printerModelLine.match(/; printer_model = (.*)/);
+    if (printerModelMatch) {
+      printerModel = printerModelMatch[1];
     }
   }
 
@@ -115,6 +128,7 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
     colors: colorData,
     totalTime: modelPrintTime,
     estimatedTime: totalEstimatedTime,
-    modelImage: undefined
+    modelImage: undefined,
+    printerModel: printerModel,
   };
 }

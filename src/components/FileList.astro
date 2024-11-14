@@ -1,29 +1,11 @@
 ---
 import Card from './Card.astro';
-import GCodeFileMetadata from './GCodeFileMetadata.astro';
 import { filesStore } from '../store/fileStore';
-
-interface Color {
-  color: string;
-  weight: number;
-}
-
-interface FileMetadata {
-  plateName: string;
-  colors: Color[];
-  totalTime: number;
-  estimatedTime: number;
-}
-
-interface GCodeFile {
-  id: string;
-  quantity: number;
-  content: string;
-  metadata: FileMetadata;
-}
+import type { GCodeFile } from '../types/gcode';
 
 const initialFiles: readonly GCodeFile[] = filesStore.get();
 ---
+
 <!-- File List -->
 <div id="file-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
     {initialFiles.map((file) => (
@@ -57,7 +39,7 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
           </button>
         </div>
         
-        <div class="gcode-preview-container" data-gcode={encodeURIComponent(file.content)}></div>
+        <div class="gcode-preview-container"></div>
         
         <div class="mt-4">
           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">File: {file.metadata.plateName}</h4>
@@ -101,11 +83,10 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
   import { filesStore, type GCodeFile } from '../store/fileStore';
   import Sortable from 'sortablejs';
   import * as GCodePreview from 'gcode-preview';
-  import tinycolor from 'tinycolor2';
 
   interface GCodePreviewOptions {
     canvas: HTMLCanvasElement;
-    extrusionColor: string;
+    extrusionColor: string | string[];
     backgroundColor: string;
     initialCameraPosition: [number, number, number];
     buildVolume: {
@@ -115,35 +96,39 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
     };
   }
   
-  async function initializeGCodePreview(container: HTMLElement, gcode: string): Promise<void> {
+  async function initializeGCodePreview(container: HTMLElement, file: GCodeFile): Promise<void> {
     const canvas = document.createElement('canvas');
     canvas.className = 'w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg';
     container.appendChild(canvas);
+    
+    const extrusionColors = file.metadata.colors
+      .filter(c => c.weight > 0)
+      .map(c => c.color);
+    
+      console.log(extrusionColors);
+      console.log(file.metadata.printerModel);
 
+    let volume = [180,180,180];
+    switch(file.metadata.printerModel){
+        case "Bambu Lab A1 mini":
+            volume = [180,180,180]
+    }
     const preview = GCodePreview.init({
       canvas,
-      extrusionColor: ['#FFFFFF', '#BC0900', '#000000', '#F1F1F1'],
+      extrusionColor: extrusionColors.length > 0 ? extrusionColors.toString() : ['#FFFFFF'],
       backgroundColor: '#111827',
+      renderTubes: true,
       buildVolume: {
-      x: 220,
-      y: 220,
-      z: 250
+        x: volume[0],
+        y: volume[1],
+        z: volume[2]
       }
-      } as unknown as GCodePreviewOptions);
+    } as unknown as GCodePreviewOptions);
 
-    await preview.processGCode(gcode);
-  }
-  function getContrastColor(hexcolor: string) {
-    // Remove the # if present
-    const hex = hexcolor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+    await preview.processGCode(file.content);
   }
 
-  function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
+  function updateFileList(files: readonly GCodeFile[]): void {
     const fileList = document.getElementById('file-list');
     if (!fileList) return;
 
@@ -171,34 +156,33 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
           </div>
           <button
             class="drag-handle p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-grab active:cursor-grabbing"
-            title="Drag to reorder"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
             </svg>
           </button>
         </div>
-        <div class="gcode-preview-container" data-gcode="${encodeURIComponent(file.content)}"></div>
+        <div class="gcode-preview-container"></div>
         <div class="mt-4">
           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">File: ${file.metadata.plateName}</h4>
-          <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Colors Used:</h4>
+          <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Filament Usage:</h4>
           <ul class="space-y-2">
-              ${file.metadata.colors
+            ${file.metadata.colors
               .filter(color => color.weight > 0)
-              .map(({ color, weight }) => (`
-              <li class="flex items-center justify-between text-gray-600 dark:text-gray-400">
-                <div class="flex items-center gap-2">
-                  <div 
-                    class="w-6 h-6 rounded border border-gray-200 dark:border-gray-600" 
-                    style="background-color: ${color}"
-                  ></div>
-                  <span>${color}</span>
-                </div>
-                <span>${weight.toFixed(2)}g</span>
-              </li>
-            `))}
+              .map(({ color, weight }) => `
+                <li class="flex items-center justify-between text-gray-600 dark:text-gray-400 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div class="flex items-center gap-2">
+                    <div 
+                      class="w-6 h-6 rounded border border-gray-200 dark:border-gray-600" 
+                      style="background-color: ${color}"
+                    ></div>
+                    <span>${color}</span>
+                  </div>
+                  <span>${(weight * file.quantity).toFixed(2)}g</span>
+                </li>
+              `).join('')}
           </ul>
-          <div class="mt-2 grid grid-cols-2 gap-4">
+          <div class="mt-4 grid grid-cols-2 gap-4">
             <div>
               <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Print Time:</h4>
               <p class="text-gray-600 dark:text-gray-400">
@@ -216,13 +200,15 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
       </div>
     `).join('');
 
-    // Initialize GCodePreview for each container
-    document.querySelectorAll('.gcode-preview-container').forEach(container => {
-      const encodedGcode = container.getAttribute('data-gcode');
-      if (!encodedGcode) return;
+    // Initialize GCodePreview for each container and pass the corresponding file
+    document.querySelectorAll('.file-item').forEach(fileItem => {
+      const fileId = fileItem.getAttribute('data-file-id');
+      const file = files.find(f => f.id === fileId);
+      const container = fileItem.querySelector('.gcode-preview-container');
       
-      const gcode = decodeURIComponent(encodedGcode);
-      initializeGCodePreview(container as HTMLElement, gcode).catch(console.error);
+      if (file && container) {
+        initializeGCodePreview(container as HTMLElement, file).catch(console.error);
+      }
     });
 
     initializeSortable();
@@ -272,7 +258,7 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
     initializeSortable();
   });
 
-// Handle quantity changes
+  // Handle quantity changes
   document.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
     if (target.matches('input[type="number"][data-file-id]')) {
@@ -288,7 +274,6 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
       }
     }
   });
-  filesStore.subscribe(updateFileList);
 </script>
 
 <style is:global>

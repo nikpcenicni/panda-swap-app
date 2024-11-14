@@ -1,6 +1,4 @@
 ---
-import Card from './Card.astro';
-import GCodeFileMetadata from './GCodeFileMetadata.astro';
 import { filesStore } from '../store/fileStore';
 
 interface Color {
@@ -15,6 +13,7 @@ interface FileMetadata {
   colors: Color[];
   totalTime: number;
   estimatedTime: number;
+  printerModel: string;
 }
 
 interface GCodeFile {
@@ -25,28 +24,41 @@ interface GCodeFile {
 }
 
 const initialFiles: readonly GCodeFile[] = filesStore.get();
-// Calculate initial totals across all files and quantities
-const initialTotals = initialFiles.reduce((acc, file) => {
-  file.metadata.colors.forEach(({ color, weight, cost, filament_type }) => {
-    if (!acc[color]) {
-      acc[color] = { weight: 0 };
-    }
-    acc[color].weight += weight * file.quantity;
-  });
-  return acc;
-}, {} as Record<string, { weight: number; }>);
 
 const totalTime = initialFiles.reduce((total, file) => 
   total + (file.metadata.estimatedTime * file.quantity), 0);
+
+// Get unique printer models
+const printerModels = Array.from(new Set(
+  initialFiles.map(file => file.metadata.printerModel)
+)).filter(Boolean);
+
 ---
 <!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Print Job Summary</h3>
+  <div class="flex justify-between items-start mb-4">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Print Job Summary</h3>
+    <button
+      id="compile-button"
+      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      disabled={initialFiles.length === 0}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8l4-2 4 2V6z" clip-rule="evenodd"/>
+      </svg>
+      Compile GCode
+    </button>
+  </div>
   <div class="grid grid-cols-1 gap-6">
     <div>
       <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         Total Print Time: {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
       </h4>
+      <div id="printer-models" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {printerModels.length > 0 && (
+          `Printer${printerModels.length > 1 ? 's' : ''}: ${printerModels.join(', ')}`
+        )}
+      </div>
       <div class="space-y-2 mt-4" id="total-usage"></div>
     </div>
   </div>
@@ -56,9 +68,55 @@ const totalTime = initialFiles.reduce((total, file) =>
   import { filesStore, type GCodeFile } from '../store/fileStore';
   import tinycolor from 'tinycolor2';
 
+  function compileGCode(files: readonly GCodeFile[]): string {
+    let compiledGCode = '; Compiled GCode File\n';
+    compiledGCode += `; Total Files: ${files.length}\n`;
+    
+    // Add printer model info
+    const printerModels = Array.from(new Set(files.map(f => f.metadata.printerModel))).filter(Boolean);
+    if (printerModels.length > 0) {
+      compiledGCode += `; Printer Model(s): ${printerModels.join(', ')}\n`;
+    }
+
+    // Add timestamp
+    compiledGCode += `; Generated: ${new Date().toISOString()}\n\n`;
+
+    // Process each file
+    files.forEach((file, index) => {
+      for (let i = 0; i < file.quantity; i++) {
+        compiledGCode += `\n; Start of ${file.metadata.plateName} (Copy ${i + 1}/${file.quantity})\n`;
+        compiledGCode += `; Original File: ${file.metadata.plateName}\n`;
+        compiledGCode += `; Printer Model: ${file.metadata.printerModel || 'Unknown'}\n`;
+        compiledGCode += `; Estimated Time: ${Math.floor(file.metadata.estimatedTime / 60)}h ${Math.round(file.metadata.estimatedTime % 60)}m\n`;
+        compiledGCode += file.content;
+        compiledGCode += `\n; End of ${file.metadata.plateName}\n`;
+      }
+    });
+
+    return compiledGCode;
+  }
+
+  function downloadGCode(content: string) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `compiled_print_job_${new Date().toISOString().slice(0,10)}.gcode`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function updateSummary(files: readonly GCodeFile[]): void {
     const totalUsageElement = document.getElementById('total-usage');
-    if (!totalUsageElement) return;
+    const compileButton = document.getElementById('compile-button');
+    const printerModelsElement = document.getElementById('printer-models');
+    
+    if (!totalUsageElement || !compileButton || !printerModelsElement) return;
+
+    // Update compile button state
+    compileButton.disabled = files.length === 0;
 
     // Calculate totals per color across all files
     const totals = files.reduce((acc, file) => {
@@ -76,6 +134,20 @@ const totalTime = initialFiles.reduce((total, file) =>
     // Calculate total print time
     const totalTime = files.reduce((total, file) =>
       total + (file.metadata.estimatedTime * file.quantity), 0);
+
+    // Update printer models
+    const printerModels = Array.from(new Set(
+      files.map(file => file.metadata.printerModel)
+    )).filter(Boolean);
+
+    // Update printer models display
+    if (printerModels.length > 0) {
+      printerModelsElement.textContent = `Printer${printerModels.length > 1 ? 's' : ''}: ${printerModels.join(', ')}`;
+      printerModelsElement.classList.remove('hidden');
+    } else {
+      printerModelsElement.textContent = '';
+      printerModelsElement.classList.add('hidden');
+    }
 
     // Update the summary HTML
     totalUsageElement.innerHTML = Object.entries(totals)
@@ -135,6 +207,15 @@ const totalTime = initialFiles.reduce((total, file) =>
   // Initialize subscription
   filesStore.subscribe(updateFileList);
 
+  // Handle compile button click
+  document.getElementById('compile-button')?.addEventListener('click', () => {
+    const files = filesStore.get();
+    if (files.length > 0) {
+      const compiledGCode = compileGCode(files);
+      downloadGCode(compiledGCode);
+    }
+  });
+
   // Handle quantity changes
   document.addEventListener('change', (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -151,6 +232,4 @@ const totalTime = initialFiles.reduce((total, file) =>
       }
     }
   });
-
-  filesStore.subscribe(updateFileList);
 </script>

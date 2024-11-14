@@ -12,6 +12,7 @@ export interface Color {
     totalTime: number;
     estimatedTime: number;
     modelImage?: string;
+    printerModel: string
   }
   
   export interface GCodeFile {

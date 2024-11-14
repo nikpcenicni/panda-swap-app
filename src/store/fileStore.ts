@@ -12,6 +12,7 @@ export interface GCodeFile {
     totalTime: number;
     estimatedTime: number;
     modelImage?: string;
+    printerModel: string;
   };
 }
 
