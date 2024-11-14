@@ -37,7 +37,6 @@ const initialTotals = initialFiles.reduce((acc, file) => {
 const totalTime = initialFiles.reduce((total, file) => 
   total + (file.metadata.estimatedTime * file.quantity), 0);
 ---
----
 <!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Print Job Summary</h3>
@@ -149,15 +148,14 @@ const totalTime = initialFiles.reduce((total, file) =>
 
     const preview = GCodePreview.init({
       canvas,
-      extrusionColor: '#3b82f6',
+      extrusionColor: ['#FFFFFF', '#BC0900', '#000000', '#F1F1F1'],
       backgroundColor: '#111827',
-      initialCameraPosition: [0, -200, 200],
       buildVolume: {
-        x: 220,
-        y: 220,
-        z: 250
+      x: 220,
+      y: 220,
+      z: 250
       }
-    } as GCodePreviewOptions);
+      } as unknown as GCodePreviewOptions);
 
     await preview.processGCode(gcode);
   }

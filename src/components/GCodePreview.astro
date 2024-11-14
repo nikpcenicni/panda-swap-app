@@ -18,14 +18,9 @@ const { gcode } = Astro.props;
   if (canvas instanceof HTMLCanvasElement) {
     const preview = GCodePreview.init({
       canvas,
-      extrusionColor: '#3b82f6', // blue-500
+      extrusionColor: ['#FFFFFF','#BC0900','#000000','#FFFFFF'],
       backgroundColor: '#111827', // gray-900
-      initialCameraPosition: [0, -200, 200],
-      buildVolume: {
-        x: 220,
-        y: 220,
-        z: 250
-      }
+  
     });
 
     // Load the GCODE

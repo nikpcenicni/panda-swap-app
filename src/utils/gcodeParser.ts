@@ -3,6 +3,7 @@
 interface Color {
   color: string;
   weight: number;
+  cost: number;
 }
 
 interface FileMetadata {
@@ -43,7 +44,7 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
   const plateName = fileName.replace(/\.gcode$/, '');
 
   // Extract colors from filament_colour line - ensure we handle the hex format correctly
-  const colorLine = lines.find(line => line.includes('filament_colour ='));
+  const colorLine = lines.find(line => line.includes('; filament_colour ='));
   let colors: string[] = [];
   if (colorLine) {
     const colorMatch = colorLine.match(/filament_colour = (.*)/);
@@ -66,20 +67,34 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
         .map(w => parseFloat(w.trim()));
     }
   }
+  // Parse filament costs
+  const costLine = lines.find(line => line.includes('; filament cost ='));
+  let costs: number[] = [];
+  if (costLine) {
+    const costMatch = costLine.match(/; filament cost = (.*)/);
+    if (costMatch) {
+      costs = costMatch[1]
+        .split(',')
+        .map(w => parseFloat(w.trim()));
+    }
+  }
 
   // Combine colors with their weights, ensuring colors that weren't used (weight = 0) are filtered out
   const colorData: Color[] = colors.map((color, index) => ({
     color: color.startsWith('#') ? color : `#${color}`,
-    weight: weights[index] || 0
+    weight: weights[index] || 0,
+    cost: costs[index] || 0
   })).filter(c => c.weight > 0);
 
   // Provide default if no colors found or all weights were 0
   if (colorData.length === 0) {
     colorData.push({
       color: '#FFFFFF',
-      weight: 0
+      weight: 0,
+      cost: 0
     });
   }
+  console.log(colorData);
 
   return {
     plateName,
