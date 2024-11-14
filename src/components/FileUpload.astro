@@ -1,6 +1,5 @@
 ---
 import Card from './Card.astro';
-import { filesStore } from '../store/fileStore';
 ---
 <Card title="Upload GCODE Files">
   <div
@@ -86,6 +85,20 @@ import { filesStore } from '../store/fileStore';
     return requiredHeaders.every(header => content.includes(header));
   }
 
+  function compareColors(colors1: Array<{ color: string }>, colors2: Array<{ color: string }>): boolean {
+    if (colors1.length !== colors2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < colors1.length; i++) {
+      if (colors1[i].color !== colors2[i].color) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   async function handleFiles(fileList: FileList) {
     const files = Array.from(fileList);
     const existingFiles = filesStore.get();
@@ -108,6 +121,15 @@ import { filesStore } from '../store/fileStore';
         }
 
         const metadata = parseGCodeFile(content, file.name);
+
+        // Check if colors match with existing files
+        if (existingFiles.length > 0) {
+          const matchingFile = existingFiles.find(f => compareColors(f.metadata.colors, metadata.colors));
+          if (!matchingFile) {
+            showError(`File "${file.name}" has different colors than the existing files.`);
+            continue;
+          }
+        }
         
         newFiles.push({
           id: crypto.randomUUID(),

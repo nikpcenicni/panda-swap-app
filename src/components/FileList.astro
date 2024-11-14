@@ -183,7 +183,9 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">File: ${file.metadata.plateName}</h4>
           <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Colors Used:</h4>
           <ul class="space-y-2">
-            ${file.metadata.colors.map(({ color, weight }) => `
+              ${file.metadata.colors
+              .filter(color => color.weight > 0)
+              .map(({ color, weight }) => (`
               <li class="flex items-center justify-between text-gray-600 dark:text-gray-400">
                 <div class="flex items-center gap-2">
                   <div 
@@ -194,7 +196,7 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
                 </div>
                 <span>${weight.toFixed(2)}g</span>
               </li>
-            `).join('')}
+            `))}
           </ul>
           <div class="mt-2 grid grid-cols-2 gap-4">
             <div>
