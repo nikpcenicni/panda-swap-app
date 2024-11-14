@@ -1,39 +1,13 @@
 ---
 import { filesStore } from '../store/fileStore';
-
-interface Color {
-  color: string;
-  weight: number;
-  cost: number;
-  filament_type: string;
-}
-
-interface FileMetadata {
-  plateName: string;
-  colors: Color[];
-  totalTime: number;
-  estimatedTime: number;
-  printerModel: string;
-}
-
-interface GCodeFile {
-  id: string;
-  quantity: number;
-  content: string;
-  metadata: FileMetadata;
-}
+import type { GCodeFile } from '../types/gcode';
+import { calculatePrinterModels, calculateTotalTime } from '../utils/gcode-helpers';
 
 const initialFiles: readonly GCodeFile[] = filesStore.get();
-
-const totalTime = initialFiles.reduce((total, file) => 
-  total + (file.metadata.estimatedTime * file.quantity), 0);
-
-// Get unique printer models
-const printerModels = Array.from(new Set(
-  initialFiles.map(file => file.metadata.printerModel)
-)).filter(Boolean);
-
+const totalTime = calculateTotalTime(initialFiles);
+const printerModels = calculatePrinterModels(initialFiles);
 ---
+
 <!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
   <div class="flex justify-between items-start mb-4">
@@ -65,48 +39,10 @@ const printerModels = Array.from(new Set(
 </div>
 
 <script>
-  import { filesStore, type GCodeFile } from '../store/fileStore';
+  import { filesStore } from '../store/fileStore';
+  import type { GCodeFile } from '../types/gcode';
+  import { compileGCode, downloadGCode, calculatePrinterModels, calculateTotalTime, formatTime } from '../utils/gcode-helpers';
   import tinycolor from 'tinycolor2';
-
-  function compileGCode(files: readonly GCodeFile[]): string {
-    let compiledGCode = '; Compiled GCode File\n';
-    compiledGCode += `; Total Files: ${files.length}\n`;
-    
-    // Add printer model info
-    const printerModels = Array.from(new Set(files.map(f => f.metadata.printerModel))).filter(Boolean);
-    if (printerModels.length > 0) {
-      compiledGCode += `; Printer Model(s): ${printerModels.join(', ')}\n`;
-    }
-
-    // Add timestamp
-    compiledGCode += `; Generated: ${new Date().toISOString()}\n\n`;
-
-    // Process each file
-    files.forEach((file, index) => {
-      for (let i = 0; i < file.quantity; i++) {
-        compiledGCode += `\n; Start of ${file.metadata.plateName} (Copy ${i + 1}/${file.quantity})\n`;
-        compiledGCode += `; Original File: ${file.metadata.plateName}\n`;
-        compiledGCode += `; Printer Model: ${file.metadata.printerModel || 'Unknown'}\n`;
-        compiledGCode += `; Estimated Time: ${Math.floor(file.metadata.estimatedTime / 60)}h ${Math.round(file.metadata.estimatedTime % 60)}m\n`;
-        compiledGCode += file.content;
-        compiledGCode += `\n; End of ${file.metadata.plateName}\n`;
-      }
-    });
-
-    return compiledGCode;
-  }
-
-  function downloadGCode(content: string) {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `compiled_print_job_${new Date().toISOString().slice(0,10)}.gcode`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
 
   function updateSummary(files: readonly GCodeFile[]): void {
     const totalUsageElement = document.getElementById('total-usage');
@@ -131,16 +67,8 @@ const printerModels = Array.from(new Set(
       return acc;
     }, {} as Record<string, { color: string; weight: number; cost: number; filament_type: string; }>);
 
-    // Calculate total print time
-    const totalTime = files.reduce((total, file) =>
-      total + (file.metadata.estimatedTime * file.quantity), 0);
-
-    // Update printer models
-    const printerModels = Array.from(new Set(
-      files.map(file => file.metadata.printerModel)
-    )).filter(Boolean);
-
     // Update printer models display
+    const printerModels = calculatePrinterModels(files);
     if (printerModels.length > 0) {
       printerModelsElement.textContent = `Printer${printerModels.length > 1 ? 's' : ''}: ${printerModels.join(', ')}`;
       printerModelsElement.classList.remove('hidden');
@@ -192,20 +120,15 @@ const printerModels = Array.from(new Set(
       .join('');
 
     // Update total time
-    const hours = Math.floor(totalTime / 60);
-    const minutes = Math.round(totalTime % 60);
+    const totalTime = calculateTotalTime(files);
     const totalTimeElement = document.querySelector('#print-summary h4');
     if (totalTimeElement) {
-      totalTimeElement.textContent = `Total Print Time: ${hours}h ${minutes}m`;
+      totalTimeElement.textContent = `Total Print Time: ${formatTime(totalTime)}`;
     }
   }
 
-  function updateFileList(files: readonly GCodeFile[], oldFiles?: readonly GCodeFile[]): void {
-    updateSummary(files);
-  }
-
   // Initialize subscription
-  filesStore.subscribe(updateFileList);
+  filesStore.subscribe(updateSummary);
 
   // Handle compile button click
   document.getElementById('compile-button')?.addEventListener('click', () => {

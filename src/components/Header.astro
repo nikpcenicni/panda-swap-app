@@ -1,4 +1,6 @@
 ---
+import ThemeIcons from './ThemeIcons.astro';
+
 interface Props {
   title?: string;
 }
@@ -12,25 +14,54 @@ const { title = "Panda Swap" } = Astro.props;
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
       <button
         id="theme-toggle"
-        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+        type="button"
+        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
+        aria-label="Toggle theme"
       >
-        <span class="dark:hidden">🌙</span>
-        <span class="hidden dark:inline">☀️</span>
+        <ThemeIcons className="w-5 h-5" />
       </button>
     </div>
   </div>
 </header>
 
 <script>
-  const themeToggle = document.getElementById('theme-toggle');
-  
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem(
-        'theme',
-        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-      );
-    });
+  function initTheme() {
+    const theme = localStorage.getItem('theme-preference') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme-preference', isDark ? 'light' : 'dark');
+  }
+
+  // Initialize theme
+  initTheme();
+
+  // Add click handler
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+
+  // Handle system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme-preference')) {
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  });
+
+  // Re-run initialization when navigating between pages
+  document.addEventListener('astro:after-swap', initTheme);
 </script>
