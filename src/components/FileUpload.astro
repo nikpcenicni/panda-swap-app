@@ -2,7 +2,6 @@
 import Card from './Card.astro';
 import { filesStore } from '../store/fileStore';
 ---
-
 <Card title="Upload GCODE Files">
   <div
     id="dropzone"
@@ -39,66 +38,135 @@ import { filesStore } from '../store/fileStore';
       </div>
     </div>
   </div>
+
+  <!-- Error Message -->
+  <div id="error-message" class="mt-4 text-red-500 dark:text-red-400 text-sm hidden"></div>
 </Card>
 
 <script>
   import { filesStore } from '../store/fileStore';
   import { parseGCodeFile } from '../utils/gcodeParser';
 
+  interface ProcessedFile {
+    id: string;
+    name: string;
+    content: string;
+    quantity: number;
+    metadata: {
+      plateName: string;
+      colors: Array<{ color: string; weight: number; }>;
+      totalTime: number;
+      estimatedTime: number;
+      modelImage?: string;
+    };
+  }
+
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  const errorMessage = document.getElementById('error-message');
+
+  function showError(message: string) {
+    if (errorMessage) {
+      errorMessage.textContent = message;
+      errorMessage.classList.remove('hidden');
+      setTimeout(() => {
+        errorMessage.classList.add('hidden');
+      }, 5000);
+    }
+  }
+
+  async function validateGCodeFile(content: string): Promise<boolean> {
+    // Check for required GCode headers
+    const requiredHeaders = [
+      '; model printing time:',
+      'filament_colour =',
+      '; filament used [g] ='
+    ];
+
+    return requiredHeaders.every(header => content.includes(header));
+  }
 
   async function handleFiles(fileList: FileList) {
     const files = Array.from(fileList);
-    
+    const existingFiles = filesStore.get();
+    const newFiles: ProcessedFile[] = [];
+
     for (const file of files) {
       try {
+        // Check if file is already uploaded
+        if (existingFiles.some(f => f.name === file.name)) {
+          showError(`File "${file.name}" has already been uploaded.`);
+          continue;
+        }
+
         const content = await file.text();
-        const metadata = parseGCodeFile(content, file.name); // Pass the filename
+
+        // Validate GCode file
+        if (!await validateGCodeFile(content)) {
+          showError(`File "${file.name}" appears to be invalid or corrupted.`);
+          continue;
+        }
+
+        const metadata = parseGCodeFile(content, file.name);
         
-        const newFile = {
+        newFiles.push({
           id: crypto.randomUUID(),
           name: file.name,
           content,
           quantity: 1,
           metadata
-        };
-        
-        filesStore.set([...filesStore.get(), newFile]);
+        });
       } catch (error) {
         console.error(`Error processing file ${file.name}:`, error);
+        showError(`Error processing file "${file.name}". Please make sure it's a valid GCode file.`);
       }
+    }
+
+    if (newFiles.length > 0) {
+      filesStore.set([...existingFiles, ...newFiles]);
     }
   }
 
   if (dropzone && fileInput) {
+    // Highlight dropzone on drag over
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropzone.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
     });
 
+    // Remove highlight on drag leave
     dropzone.addEventListener('dragleave', () => {
       dropzone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
     });
 
+    // Handle file drop
     dropzone.addEventListener('drop', async (e) => {
       e.preventDefault();
       dropzone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10');
-      
       if (e.dataTransfer?.files) {
         await handleFiles(e.dataTransfer.files);
       }
     });
 
+    // Handle click to browse
     dropzone.addEventListener('click', () => {
       fileInput.click();
     });
 
+    // Handle file selection through browse
     fileInput.addEventListener('change', async (e) => {
       const target = e.target as HTMLInputElement;
       if (target.files) {
         await handleFiles(target.files);
+        // Reset the input to allow uploading the same file again if needed
+        target.value = '';
       }
     });
   }
 </script>
+
+<style>
+  .dropzone-active {
+    @apply border-blue-500 bg-blue-50 dark:bg-blue-900/10;
+  }
+</style>

@@ -1,15 +1,28 @@
 // src/utils/gcodeParser.ts
-export function parseGCodeFile(content: string, fileName: string) { // Add fileName parameter
+
+interface Color {
+  color: string;
+  weight: number;
+}
+
+interface FileMetadata {
+  plateName: string;
+  colors: Color[];
+  totalTime: number;
+  estimatedTime: number;
+  modelImage?: string;
+}
+
+export function parseGCodeFile(content: string, fileName: string): FileMetadata {
   const lines = content.split('\n');
   
   // Extract print times from header
-  const printTimeLine = lines.find(line => 
+  const printTimeLine = lines.find(line =>
     line.includes('; model printing time:') && line.includes('total estimated time:')
   );
-
   let modelPrintTime = 0;
   let totalEstimatedTime = 0;
-
+  
   if (printTimeLine) {
     // Parse model printing time
     const modelMatch = printTimeLine.match(/model printing time: (\d+)h (\d+)m (\d+)s/);
@@ -17,7 +30,7 @@ export function parseGCodeFile(content: string, fileName: string) { // Add fileN
       const [_, hours, minutes, seconds] = modelMatch;
       modelPrintTime = (parseInt(hours) * 60) + parseInt(minutes) + (parseInt(seconds) / 60);
     }
-
+    
     // Parse total estimated time
     const totalMatch = printTimeLine.match(/total estimated time: (\d+)h (\d+)m (\d+)s/);
     if (totalMatch) {
@@ -29,35 +42,48 @@ export function parseGCodeFile(content: string, fileName: string) { // Add fileN
   // Use filename without .gcode extension as plate name
   const plateName = fileName.replace(/\.gcode$/, '');
 
-  // Extract colors from extruder_colour line
-  const colorLine = lines.find(line => line.includes('; extruder_colour ='));
-  let colors: { color: string; weight: number }[] = [];
-
+  // Extract colors from filament_colour line - ensure we handle the hex format correctly
+  const colorLine = lines.find(line => line.includes('filament_colour ='));
+  let colors: string[] = [];
   if (colorLine) {
-    const colorMatch = colorLine.match(/extruder_colour = (.*?);/);
+    const colorMatch = colorLine.match(/filament_colour = (.*)/);
     if (colorMatch) {
-      const colorArray = colorMatch[1].split(';').map(color => color.trim());
-      colors = colorArray.map(hexColor => ({
-        color: hexColor,
-        weight: 0
-      }));
+      colors = colorMatch[1]
+        .split(';')
+        .map(color => color.trim())
+        .filter(color => color); // Remove empty strings
     }
   }
 
-  // Parse filament weights and match them to colors
-  lines.forEach(line => {
-    if (line.includes(';FILAMENT_USED:')) {
-      const weight = parseFloat(line.split(':')[1].trim());
-      const colorIndex = colors.findIndex(c => c.weight === 0);
-      if (colorIndex !== -1) {
-        colors[colorIndex].weight = weight;
-      }
+  // Parse filament weights
+  const weightLine = lines.find(line => line.includes('; filament used [g] ='));
+  let weights: number[] = [];
+  if (weightLine) {
+    const weightMatch = weightLine.match(/; filament used \[g\] = (.*)/);
+    if (weightMatch) {
+      weights = weightMatch[1]
+        .split(',')
+        .map(w => parseFloat(w.trim()));
     }
-  });
+  }
+
+  // Combine colors with their weights, ensuring colors that weren't used (weight = 0) are filtered out
+  const colorData: Color[] = colors.map((color, index) => ({
+    color: color.startsWith('#') ? color : `#${color}`,
+    weight: weights[index] || 0
+  })).filter(c => c.weight > 0);
+
+  // Provide default if no colors found or all weights were 0
+  if (colorData.length === 0) {
+    colorData.push({
+      color: '#FFFFFF',
+      weight: 0
+    });
+  }
 
   return {
     plateName,
-    colors: colors.length ? colors : [{ color: '#FFFFFF', weight: 0 }],
+    colors: colorData,
     totalTime: modelPrintTime,
     estimatedTime: totalEstimatedTime,
     modelImage: undefined

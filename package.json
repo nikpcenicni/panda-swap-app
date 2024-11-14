@@ -23,9 +23,11 @@
     "react-dom": "^18.3.1",
     "sortablejs": "^1.15.3",
     "tailwindcss": "^3.4.14",
+    "tinycolor2": "^1.6.0",
     "typescript": "^5.6.3"
   },
   "devDependencies": {
-    "@types/sortablejs": "^1.15.8"
+    "@types/sortablejs": "^1.15.8",
+    "@types/tinycolor2": "^1.4.6"
   }
 }
