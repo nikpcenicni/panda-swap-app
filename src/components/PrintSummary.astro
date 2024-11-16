@@ -1,9 +1,11 @@
 ---
 import { filesStore } from '../store/fileStore';
+import { settingsStore } from '../store/settings-store'; // Add this import
 import type { GCodeFile } from '../types/gcode';
 import { calculatePrinterModels, calculateTotalTime } from '../utils/gcode-helpers';
 
 const initialFiles: readonly GCodeFile[] = filesStore.get();
+const settings = settingsStore.get();
 const totalTime = calculateTotalTime(initialFiles);
 const printerModels = calculatePrinterModels(initialFiles);
 ---
@@ -11,7 +13,10 @@ const printerModels = calculatePrinterModels(initialFiles);
 <!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
   <div class="flex justify-between items-start mb-4">
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Print Job Summary</h3>
+    <div>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Print Job Summary</h3>
+      <div id="total-cost" class="text-sm text-gray-600 dark:text-gray-400 mt-1"></div>
+    </div>
     <button
       id="compile-button"
       class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -40,6 +45,7 @@ const printerModels = calculatePrinterModels(initialFiles);
 
 <script>
   import { filesStore } from '../store/fileStore';
+  import { settingsStore } from '../store/settings-store'; // Add this import
   import type { GCodeFile } from '../types/gcode';
   import { compileGCode, downloadGCode, calculatePrinterModels, calculateTotalTime, formatTime } from '../utils/gcode-helpers';
   import tinycolor from 'tinycolor2';
@@ -48,8 +54,10 @@ const printerModels = calculatePrinterModels(initialFiles);
     const totalUsageElement = document.getElementById('total-usage');
     const compileButton = document.getElementById('compile-button');
     const printerModelsElement = document.getElementById('printer-models');
+    const totalCostElement = document.getElementById('total-cost');
+    const settings = settingsStore.get();
     
-    if (!totalUsageElement || !compileButton || !printerModelsElement) return;
+    if (!totalUsageElement || !compileButton || !printerModelsElement || !totalCostElement) return;
 
     // Update compile button state
     compileButton.disabled = files.length === 0;
@@ -67,6 +75,19 @@ const printerModels = calculatePrinterModels(initialFiles);
       return acc;
     }, {} as Record<string, { color: string; weight: number; cost: number; filament_type: string; }>);
 
+    // Filter out empty slots if hideEmptyFilaments is true
+    const filteredTotals = settings.display.hideEmptyFilaments
+      ? Object.entries(totals).filter(([_, data]) => data.weight > 0)
+      : Object.entries(totals);
+
+    // Calculate and display total cost if enabled
+    if (settings.display.showTotalCost) {
+      const totalCost = Object.values(totals).reduce((sum, { cost }) => sum + cost, 0);
+      totalCostElement.textContent = `Total Cost: $${totalCost.toFixed(2)}`;
+    } else {
+      totalCostElement.textContent = '';
+    }
+
     // Update printer models display
     const printerModels = calculatePrinterModels(files);
     if (printerModels.length > 0) {
@@ -77,47 +98,86 @@ const printerModels = calculatePrinterModels(initialFiles);
       printerModelsElement.classList.add('hidden');
     }
 
-    // Update the summary HTML
-    totalUsageElement.innerHTML = Object.entries(totals)
-      .map(([slotKey, { color, weight, cost, filament_type }]) => {
-        const tc = tinycolor(color);
-        const displayColor = tc.toString('hex');
-        const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
-        return `
-          <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
-            <div class="flex items-center gap-3">
-              <div class="relative group">
-                <div
-                  class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
-                  style="background-color: ${displayColor}; color: ${textColor}"
-                >
-                  <span class="opacity-0 group-hover:opacity-100 transition-opacity">
+    // Update the summary HTML based on compact mode
+    if (settings.display.compactMode) {
+      totalUsageElement.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-2 justify-start">
+            ${filteredTotals.map(([slotKey, { color }]) => {
+              const tc = tinycolor(color);
+              const displayColor = tc.toString('hex');
+              const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
+              return `
+                <div class="relative group">
+                  <div
+                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
+                    style="background-color: ${displayColor}; color: ${textColor}"
+                  >
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity">
+                      ${displayColor}
+                    </span>
+                  </div>
+                  <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
                     ${displayColor}
-                  </span>
+                  </div>
                 </div>
-                <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                  ${displayColor}
-                </div>
-              </div>
-              <div>
+              `;
+            }).join('')}
+          </div>
+          <div class="space-y-2">
+            ${filteredTotals.map(([slotKey, { filament_type, weight, cost }]) => `
+              <div class="p-2 bg-gray-50 dark:bg-gray-700 rounded">
                 <span class="font-medium">${slotKey}</span>
                 <div class="text-sm text-gray-600 dark:text-gray-300">
-                  ${filament_type}
+                  ${filament_type} - Weight: ${weight.toFixed(2)}g - Cost: $${cost.toFixed(2)}
                 </div>
               </div>
-              <div>
-                <div class="text-sm text-gray-600 dark:text-gray-300">
-                  Weight: ${weight.toFixed(2)}g
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      totalUsageElement.innerHTML = filteredTotals
+        .map(([slotKey, { color, weight, cost, filament_type }]) => {
+          const tc = tinycolor(color);
+          const displayColor = tc.toString('hex');
+          const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
+          return `
+            <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+              <div class="flex items-center gap-3">
+                <div class="relative group">
+                  <div
+                    class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-xs font-mono transition-all duration-200"
+                    style="background-color: ${displayColor}; color: ${textColor}"
+                  >
+                    <span class="opacity-0 group-hover:opacity-100 transition-opacity">
+                      ${displayColor}
+                    </span>
+                  </div>
+                  <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                    ${displayColor}
+                  </div>
                 </div>
-                <div class="text-sm text-gray-600 dark:text-gray-300">
-                  Cost: $${cost.toFixed(2)}
+                <div>
+                  <span class="font-medium">${slotKey}</span>
+                  <div class="text-sm text-gray-600 dark:text-gray-300">
+                    ${filament_type}
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm text-gray-600 dark:text-gray-300">
+                    Weight: ${weight.toFixed(2)}g
+                  </div>
+                  <div class="text-sm text-gray-600 dark:text-gray-300">
+                    Cost: $${cost.toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        `;
-      })
-      .join('');
+          `;
+        })
+        .join('');
+    }
 
     // Update total time
     const totalTime = calculateTotalTime(files);
@@ -127,8 +187,9 @@ const printerModels = calculatePrinterModels(initialFiles);
     }
   }
 
-  // Initialize subscription
+  // Initialize subscription to both stores
   filesStore.subscribe(updateSummary);
+  settingsStore.subscribe(() => updateSummary(filesStore.get()));
 
   // Handle compile button click
   document.getElementById('compile-button')?.addEventListener('click', () => {

@@ -1,5 +1,7 @@
 ---
 import ThemeIcons from './ThemeIcons.astro';
+import SettingsDropdown from './SettingsDropdown.astro';
+
 
 interface Props {
   title?: string;
@@ -12,14 +14,17 @@ const { title = "Panda Swap" } = Astro.props;
   <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
-      <button
-        id="theme-toggle"
-        type="button"
-        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
-        aria-label="Toggle theme"
-      >
-        <ThemeIcons className="w-5 h-5" />
-      </button>
+      <div class="flex items-center space-x-2">
+        <SettingsDropdown />
+        <button
+          id="theme-toggle"
+          type="button"
+          class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
+          aria-label="Toggle theme"
+        >
+          <ThemeIcons className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   </div>
 </header>

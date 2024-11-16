@@ -1,9 +1,9 @@
 // src/constants/gcode.ts
 export const PREVIEW_CONFIG = {
     DIMENSIONS: {
-      x: 220,
-      y: 220,
-      z: 250
+      x: 180,
+      y: 180,
+      z: 180
     },
     COLORS: {
       extrusion: '#3b82f6',

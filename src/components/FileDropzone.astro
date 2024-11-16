@@ -1,10 +1,14 @@
 ---
 import Card from './Card.astro';
+import { filesStore } from '../store/fileStore';
+import type { GCodeFile } from '../types/gcode';
+import { generateFileItemHTML } from '../utils/file-list-template';
+const initialFiles: readonly GCodeFile[] = filesStore.get();
 ---
-<Card title="Upload GCODE Files">
+<Card title="Upload GCODE Files" className="h-full flex flex-col">
   <div
     id="dropzone"
-    class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+    class="flex-1 min-h-[400px] flex flex-col border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
   >
     <input
       type="file"
@@ -13,7 +17,16 @@ import Card from './Card.astro';
       class="hidden"
       multiple
     />
-    <div class="space-y-2">
+    
+    <!-- File List -->
+    <div id="file-list" class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 overflow-y-auto">
+      {initialFiles.map((file) => (
+        <Fragment set:html={generateFileItemHTML(file)} />
+      ))}
+    </div>
+
+    <!-- Upload Area -->
+    <div class="p-8 space-y-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
       <svg
         class="mx-auto h-12 w-12 text-gray-400"
         stroke="currentColor"
@@ -36,19 +49,40 @@ import Card from './Card.astro';
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- Error Message -->
-  <div id="error-message" class="mt-4 text-red-500 dark:text-red-400 text-sm hidden"></div>
+    <!-- Error Message -->
+    <div id="error-message" class="text-red-500 dark:text-red-400 text-sm hidden p-2"></div>
+  </div>
 </Card>
 
 <script>
+  import { filesStore, type GCodeFile } from '../store/fileStore';
   import { processFiles } from '../utils/file-handlers';
   import { UI_CONFIG } from '../constants/gcode';
+  import { initializeGCodePreview } from '../utils/gcode-preview-handler';
+  import { initializeSortable } from '../utils/sortable-handler';
+  import { generateFileItemHTML } from '../utils/file-list-template';
 
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
   const errorMessage = document.getElementById('error-message');
+  const fileList = document.getElementById('file-list');
+
+  function updateFileList(files: readonly GCodeFile[]): void {
+    if (!fileList) return;
+    fileList.innerHTML = files.map(generateFileItemHTML).join('');
+    
+    // Initialize GCodePreview for each container
+    document.querySelectorAll('.file-item').forEach(fileItem => {
+      const fileId = fileItem.getAttribute('data-file-id');
+      const file = files.find(f => f.id === fileId);
+      const container = fileItem.querySelector('.gcode-preview-container');
+      if (file && container) {
+        initializeGCodePreview(container as HTMLElement, file).catch(console.error);
+      }
+    });
+    initializeSortable(fileList);
+  }
 
   function showError(message: string) {
     if (errorMessage) {
@@ -62,6 +96,32 @@ import Card from './Card.astro';
 
   if (dropzone && fileInput) {
     const dropzoneActiveClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10'];
+
+    // Initialize subscription
+    filesStore.subscribe(updateFileList);
+
+    // Initialize Sortable on load
+    document.addEventListener('astro:page-load', () => {
+      if (fileList) {
+        initializeSortable(fileList);
+      }
+    });
+
+    // Handle quantity changes
+    document.addEventListener('change', (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (target.matches('input[type="number"][data-file-id]')) {
+        const fileId = target.dataset.fileId;
+        const quantity = parseInt(target.value);
+        if (fileId) {
+          const files = [...filesStore.get()];
+          const newFiles = files.map(file =>
+            file.id === fileId ? { ...file, quantity } : file
+          );
+          filesStore.set(newFiles);
+        }
+      }
+    });
 
     // Highlight dropzone on drag over
     dropzone.addEventListener('dragover', (e) => {
@@ -84,8 +144,12 @@ import Card from './Card.astro';
     });
 
     // Handle click to browse
-    dropzone.addEventListener('click', () => {
-      fileInput.click();
+    dropzone.addEventListener('click', (e) => {
+      // Only trigger file input if clicking on the upload area or when file list is empty
+      const uploadArea = (e.target as HTMLElement).closest('.p-8');
+      if (uploadArea || !fileList?.children.length) {
+        fileInput.click();
+      }
     });
 
     // Handle file selection through browse
@@ -100,8 +164,14 @@ import Card from './Card.astro';
   }
 </script>
 
-<style>
-  .dropzone-active {
-    @apply border-blue-500 bg-blue-50 dark:bg-blue-900/10;
+<style is:global>
+  .sortable-fallback {
+    @apply pointer-events-none opacity-60;
+  }
+  .sortable-ghost {
+    @apply opacity-40 bg-blue-50 dark:bg-blue-900;
+  }
+  .sortable-drag {
+    @apply cursor-grabbing;
   }
 </style>
