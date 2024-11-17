@@ -1,0 +1,28 @@
+---
+import type { GCodeFile } from '../../types/gcode';
+import { generateFileItemHTML } from '../../utils/file-list-template';
+
+interface Props {
+  files: readonly GCodeFile[];
+}
+
+const { files } = Astro.props;
+---
+
+<div id="file-list" class={`flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 overflow-y-auto ${files.length === 0 ? 'hidden' : ''}`}>
+  {files.map((file) => (
+    <Fragment set:html={generateFileItemHTML(file)} />
+  ))}
+</div>
+
+<style is:global>
+  .sortable-fallback {
+    @apply pointer-events-none opacity-60;
+  }
+  .sortable-ghost {
+    @apply opacity-40 bg-blue-50 dark:bg-blue-900;
+  }
+  .sortable-drag {
+    @apply cursor-grabbing;
+  }
+</style>

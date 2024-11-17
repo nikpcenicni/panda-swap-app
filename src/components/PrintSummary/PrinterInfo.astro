@@ -1,0 +1,18 @@
+---
+import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
+
+interface Props {
+  printerModels: string[];
+}
+
+const { printerModels } = Astro.props;
+const { t } = useTranslations(getCurrentLanguage());
+
+const printerText = printerModels.length === 1
+  ? t('printSummary.printer.single', { name: printerModels[0] })
+  : t('printSummary.printer.multiple', { names: printerModels.join(', ') });
+---
+
+<div id="printer-models" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+  {printerModels.length > 0 && printerText}
+</div>

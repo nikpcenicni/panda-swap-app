@@ -1,0 +1,73 @@
+---
+import { useTranslations } from '../../i18n/utils';
+import { getServerSideLanguage } from '../../store/languageStore';
+import type { GCodeFile } from '../../types/gcode';
+
+interface Props {
+  initialFiles: readonly GCodeFile[];
+}
+
+const { initialFiles } = Astro.props;
+const currentLang = getServerSideLanguage();
+const { t } = useTranslations(currentLang);
+---
+
+{/* Initial large upload area - Only shown when empty */}
+<div id="initial-upload" class={`flex-1 flex items-center justify-center ${initialFiles.length > 0 ? 'hidden' : ''}`}>
+  <div class="text-center p-12">
+    <svg
+      class="mx-auto h-12 w-12 text-gray-400"
+      stroke="currentColor"
+      fill="none"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+    >
+      <path
+        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    <div class="mt-4">
+      <p class="text-lg text-gray-600 dark:text-gray-300" data-i18n-key="fileUpload.dragDrop">
+        {t('fileUpload.dragDrop')}
+      </p>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n-key="fileUpload.or">
+        {t('fileUpload.or')}
+      </p>
+      <button class="mt-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" data-i18n-key="fileUpload.browse">
+        {t('fileUpload.browse')}
+      </button>
+    </div>
+  </div>
+</div>
+
+{/* Permanent bottom upload bar */}
+<div class={`p-4 space-y-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${initialFiles.length === 0 ? 'hidden' : ''}`}>
+  <div class="flex items-center justify-center gap-3">
+    <svg
+      class="h-6 w-6 text-gray-400"
+      stroke="currentColor"
+      fill="none"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+    >
+      <path
+        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    <span class="text-gray-600 dark:text-gray-300" data-i18n-key="fileUpload.dragDrop">
+      {t('fileUpload.dragDrop')}
+    </span>
+    <span class="text-gray-600 dark:text-gray-300" data-i18n-key="fileUpload.or">
+      {t('fileUpload.or')}
+    </span>
+    <button class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+      {t('fileUpload.browse')}
+    </button>
+  </div>
+</div>

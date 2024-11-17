@@ -68,7 +68,8 @@ const translations: TranslationKeys = {
       filamentUsage: "Utilisation du filament:",
       printTime: "Temps d'impression:",
       totalTime: "Durée totale:"
-    }
+    },
+    deleteFile: "Delete File"
   }
 };
 

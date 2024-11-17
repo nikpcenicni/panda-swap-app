@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import FileDropzone from '../components/FileDropzone.astro';
+import FileUploadCard from '../components/FileUpload/FileUploadCard.astro';
 import PrintSummary from '../components/PrintSummary.astro';
+import PrintSummaryCard from '../components/PrintSummary/PrintSummaryCard.astro';
 import { getCurrentLanguage, useTranslations } from '../i18n/utils';
 
 // Initialize translations
@@ -40,9 +41,9 @@ const pageTranslations = {
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100" data-i18n="app.welcome">
         {t('app.welcome')}
       </h1>
-      
-      <PrintSummary files={files} />
-      <FileDropzone />
+      <PrintSummaryCard />
+      <!-- <PrintSummary files={files} /> -->
+      <FileUploadCard />
     </div>
   </main>
 </Layout>

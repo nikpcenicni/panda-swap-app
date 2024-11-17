@@ -1,0 +1,16 @@
+---
+import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
+import { formatTime } from '../../utils/gcode-helpers';
+
+interface Props {
+  totalTime: number;
+}
+
+const { totalTime } = Astro.props;
+const { t } = useTranslations(getCurrentLanguage());
+const formattedTime = formatTime(totalTime);
+---
+
+<h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" id="total-time">
+  {t('printSummary.totalPrintTime', { time: formattedTime })}
+</h4>

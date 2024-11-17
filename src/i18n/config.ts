@@ -69,6 +69,7 @@ export type TranslationKeys = {
           printTime: string;
           totalTime: string;
         };
+        deleteFile: string;
       };
   };
 
