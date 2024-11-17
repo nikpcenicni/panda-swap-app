@@ -19,8 +19,20 @@ const translations: TranslationKeys = {
   settings: {
     preview: {
       title: 'Preview Settings',
-      renderTubes: 'Render Tubes',
-      showGrid: 'Show Grid',
+      renderTubes: 'Show as Tubes',
+      buildArea: 'Show Build Volume',
+    },
+    gcode: {
+      title: 'GCode Settings',
+      buildPlateSwap: 'Build Plate Swap GCode'
+    },
+    display: {
+      title: 'Display Settings',
+      hideEmptyFilaments: 'Hide Empty Filaments',
+      showTotalCost: 'Show Total Cost',
+      showPrinterInfo: 'Show Printer Info',
+      compactMode: 'Compact Mode',
+      showPreview: 'Show Preview'
     }
   },
   fileUpload: {

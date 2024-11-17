@@ -1,7 +1,6 @@
 // store/settings-store.ts
-import { atom } from 'nanostores';
+import { persistentAtom } from '@nanostores/persistent';
 import type { Settings } from '../types/settings';
-
 export type { Settings } from '../types/settings';
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -21,28 +20,29 @@ export const DEFAULT_SETTINGS: Settings = {
   }
 };
 
-export const settingsStore = atom<Settings>(DEFAULT_SETTINGS);
-
-export function initSettings(): Settings {
-  if (typeof window !== 'undefined') {
-    try {
-      const savedSettings = localStorage.getItem('print-settings');
-      if (savedSettings) {
-        const parsed = JSON.parse(savedSettings);
-        const mergedSettings = {
+export const settingsStore = persistentAtom<Settings>(
+  'print-settings',
+  DEFAULT_SETTINGS,
+  {
+    encode: JSON.stringify,
+    decode: (str) => {
+      try {
+        const parsed = JSON.parse(str);
+        return {
           preview: { ...DEFAULT_SETTINGS.preview, ...parsed.preview },
           display: { ...DEFAULT_SETTINGS.display, ...parsed.display },
           gcode: { ...DEFAULT_SETTINGS.gcode, ...parsed.gcode }
         };
-        settingsStore.set(mergedSettings);
-        return mergedSettings;
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        return DEFAULT_SETTINGS;
       }
-    } catch (error) {
-      console.error('Error loading settings:', error);
     }
   }
-  settingsStore.set(DEFAULT_SETTINGS);
-  return DEFAULT_SETTINGS;
+);
+
+export function initSettings(): Settings {
+  return settingsStore.get();
 }
 
 export function updateSettings(newSettings: Partial<Settings>): void {
@@ -52,9 +52,10 @@ export function updateSettings(newSettings: Partial<Settings>): void {
     display: { ...currentSettings.display, ...(newSettings.display || {}) },
     gcode: { ...currentSettings.gcode, ...(newSettings.gcode || {}) }
   };
+  
   settingsStore.set(updatedSettings);
+  
   if (typeof window !== 'undefined') {
-    localStorage.setItem('print-settings', JSON.stringify(updatedSettings));
     window.dispatchEvent(new CustomEvent<Settings>('settings-changed', {
       detail: updatedSettings
     }));

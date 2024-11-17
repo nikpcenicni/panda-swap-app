@@ -20,7 +20,19 @@ const translations: TranslationKeys = {
     preview: {
       title: 'Paramètres de prévisualisation',
       renderTubes: "Tubes d'enduit",
-      showGrid: 'Montrer le gri',
+      buildArea: 'Show Build Volume',
+    },
+    gcode: {
+      title: 'Paramètres du code GC',
+      buildPlateSwap: 'Construire la plaque échanger le code GCode'
+    },
+    display: {
+      title: "Paramètres d'affichage",
+      hideEmptyFilaments: 'Cacher les filaments vides',
+      showTotalCost: 'Afficher le coût total',
+      showPrinterInfo: "Afficher les informations sur l'imprimante",
+      compactMode: 'Mode compact',
+      showPreview: 'Avant-première'
     }
   },
   fileUpload: {

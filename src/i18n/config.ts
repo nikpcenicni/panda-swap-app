@@ -16,8 +16,20 @@ export type TranslationKeys = {
       preview: {
         title: string;
         renderTubes: string;
-        showGrid: string;
-      }
+        buildArea: string;
+      };
+      gcode: {
+        title: string;
+        buildPlateSwap: string;
+      };
+      display: {
+        title: string;
+        hideEmptyFilaments: string;
+        showTotalCost: string;
+        showPrinterInfo: string;
+        compactMode: string;
+        showPreview: string;
+      };
     };
     error: {
       invalidFile: string;
