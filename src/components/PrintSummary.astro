@@ -1,20 +1,28 @@
 ---
 import { filesStore } from '../store/fileStore';
-import { settingsStore } from '../store/settings-store'; // Add this import
+import { settingsStore } from '../store/settings-store';
 import type { GCodeFile } from '../types/gcode';
 import { calculatePrinterModels, calculateTotalTime } from '../utils/gcode-helpers';
+import { getCurrentLanguage, useTranslations } from '../i18n/utils';
 
+const { t } = useTranslations(getCurrentLanguage());
 const initialFiles: readonly GCodeFile[] = filesStore.get();
 const settings = settingsStore.get();
 const totalTime = calculateTotalTime(initialFiles);
 const printerModels = calculatePrinterModels(initialFiles);
+const formattedTime = `${Math.floor(totalTime / 60)}h ${Math.round(totalTime % 60)}m`;
+
+// Pre-compute initial translations for SSR
+const initialTotalTimeText = t('printSummary.totalPrintTime', { time: formattedTime });
+const initialPrinterText = printerModels.length === 1 
+  ? t('printSummary.printer.single', { name: printerModels[0] })
+  : t('printSummary.printer.multiple', { names: printerModels.join(', ') });
 ---
 
-<!-- Summary Card -->
 <div id="print-summary" class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
   <div class="flex justify-between items-start mb-4">
     <div>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Print Job Summary</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100" data-i18n="printSummary.title"></h3>
       <div id="total-cost" class="text-sm text-gray-600 dark:text-gray-400 mt-1"></div>
     </div>
     <button
@@ -25,18 +33,16 @@ const printerModels = calculatePrinterModels(initialFiles);
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8l4-2 4 2V6z" clip-rule="evenodd"/>
       </svg>
-      Compile GCode
+      <span data-i18n="printSummary.compileGcode"></span>
     </button>
   </div>
   <div class="grid grid-cols-1 gap-6">
     <div>
-      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Total Print Time: {Math.floor(totalTime / 60)}h {Math.round(totalTime % 60)}m
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" id="total-time">
+        {initialTotalTimeText}
       </h4>
       <div id="printer-models" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {printerModels.length > 0 && (
-          `Printer${printerModels.length > 1 ? 's' : ''}: ${printerModels.join(', ')}`
-        )}
+        {printerModels.length > 0 && initialPrinterText}
       </div>
       <div class="space-y-2 mt-4" id="total-usage"></div>
     </div>
@@ -45,27 +51,37 @@ const printerModels = calculatePrinterModels(initialFiles);
 
 <script>
   import { filesStore } from '../store/fileStore';
-  import { settingsStore } from '../store/settings-store'; // Add this import
+  import { settingsStore } from '../store/settings-store';
+  import { getCurrentLanguage, useTranslations } from '../i18n/utils';
   import type { GCodeFile } from '../types/gcode';
   import { compileGCode, downloadGCode, calculatePrinterModels, calculateTotalTime, formatTime } from '../utils/gcode-helpers';
   import tinycolor from 'tinycolor2';
 
+  // Initialize translations
+  function initializeTranslations() {
+    const { t } = useTranslations(getCurrentLanguage());
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      if (key) element.textContent = t(key);
+    });
+  }
+
   function updateSummary(files: readonly GCodeFile[]): void {
+    const { t } = useTranslations(getCurrentLanguage());
     const totalUsageElement = document.getElementById('total-usage');
-    const compileButton = document.getElementById('compile-button');
+    const compileButton = document.getElementById('compile-button') as HTMLButtonElement;
     const printerModelsElement = document.getElementById('printer-models');
     const totalCostElement = document.getElementById('total-cost');
     const settings = settingsStore.get();
     
     if (!totalUsageElement || !compileButton || !printerModelsElement || !totalCostElement) return;
 
-    // Update compile button state
     compileButton.disabled = files.length === 0;
 
     // Calculate totals per color across all files
     const totals = files.reduce((acc, file) => {
       file.metadata.colors.forEach(({ color, weight, cost, filament_type }, index) => {
-        const slotKey = `Slot ${index + 1}`;
+        const slotKey = t('printSummary.filament.slot', { number: index + 1 });
         if (!acc[slotKey]) {
           acc[slotKey] = { color, weight: 0, cost: 0, filament_type };
         }
@@ -83,7 +99,7 @@ const printerModels = calculatePrinterModels(initialFiles);
     // Calculate and display total cost if enabled
     if (settings.display.showTotalCost) {
       const totalCost = Object.values(totals).reduce((sum, { cost }) => sum + cost, 0);
-      totalCostElement.textContent = `Total Cost: $${totalCost.toFixed(2)}`;
+      totalCostElement.textContent = t('printSummary.totalCost', { cost: totalCost.toFixed(2) });
     } else {
       totalCostElement.textContent = '';
     }
@@ -91,7 +107,9 @@ const printerModels = calculatePrinterModels(initialFiles);
     // Update printer models display
     const printerModels = calculatePrinterModels(files);
     if (printerModels.length > 0) {
-      printerModelsElement.textContent = `Printer${printerModels.length > 1 ? 's' : ''}: ${printerModels.join(', ')}`;
+      printerModelsElement.textContent = printerModels.length === 1
+        ? t('printSummary.printer.single', { name: printerModels[0] })
+        : t('printSummary.printer.multiple', { names: printerModels.join(', ') });
       printerModelsElement.classList.remove('hidden');
     } else {
       printerModelsElement.textContent = '';
@@ -103,7 +121,7 @@ const printerModels = calculatePrinterModels(initialFiles);
       totalUsageElement.innerHTML = `
         <div class="space-y-4">
           <div class="flex flex-wrap gap-2 justify-start">
-            ${filteredTotals.map(([slotKey, { color }]) => {
+            ${filteredTotals.map(([_, { color }]) => {
               const tc = tinycolor(color);
               const displayColor = tc.toString('hex');
               const textColor = tc.isLight() ? '#000000' : '#FFFFFF';
@@ -129,7 +147,9 @@ const printerModels = calculatePrinterModels(initialFiles);
               <div class="p-2 bg-gray-50 dark:bg-gray-700 rounded">
                 <span class="font-medium">${slotKey}</span>
                 <div class="text-sm text-gray-600 dark:text-gray-300">
-                  ${filament_type} - Weight: ${weight.toFixed(2)}g - Cost: $${cost.toFixed(2)}
+                  ${filament_type} - 
+                  ${t('printSummary.filament.weight', { amount: weight.toFixed(2) })} - 
+                  ${t('printSummary.filament.cost', { amount: cost.toFixed(2) })}
                 </div>
               </div>
             `).join('')}
@@ -166,10 +186,10 @@ const printerModels = calculatePrinterModels(initialFiles);
                 </div>
                 <div>
                   <div class="text-sm text-gray-600 dark:text-gray-300">
-                    Weight: ${weight.toFixed(2)}g
+                    ${t('printSummary.filament.weight', { amount: weight.toFixed(2) })}
                   </div>
                   <div class="text-sm text-gray-600 dark:text-gray-300">
-                    Cost: $${cost.toFixed(2)}
+                    ${t('printSummary.filament.cost', { amount: cost.toFixed(2) })}
                   </div>
                 </div>
               </div>
@@ -181,13 +201,23 @@ const printerModels = calculatePrinterModels(initialFiles);
 
     // Update total time
     const totalTime = calculateTotalTime(files);
-    const totalTimeElement = document.querySelector('#print-summary h4');
+    const totalTimeElement = document.querySelector('#total-time');
     if (totalTimeElement) {
-      totalTimeElement.textContent = `Total Print Time: ${formatTime(totalTime)}`;
+        const formattedTime = formatTime(totalTime);
+        totalTimeElement.textContent = t('printSummary.totalPrintTime', { time: formattedTime });
     }
   }
 
-  // Initialize subscription to both stores
+  // Initialize translations on load
+  initializeTranslations();
+
+  // Update translations when language changes
+  window.addEventListener('language-change', () => {
+    initializeTranslations();
+    updateSummary(filesStore.get());
+  });
+
+  // Initialize subscriptions
   filesStore.subscribe(updateSummary);
   settingsStore.subscribe(() => updateSummary(filesStore.get()));
 

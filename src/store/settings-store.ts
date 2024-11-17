@@ -15,6 +15,9 @@ export const DEFAULT_SETTINGS: Settings = {
     showPrinterInfo: true,
     compactMode: false,
     showPreview: true
+  },
+  gcode: {
+    buildPlateSwap: "",
   }
 };
 
@@ -28,7 +31,8 @@ export function initSettings(): Settings {
         const parsed = JSON.parse(savedSettings);
         const mergedSettings = {
           preview: { ...DEFAULT_SETTINGS.preview, ...parsed.preview },
-          display: { ...DEFAULT_SETTINGS.display, ...parsed.display }
+          display: { ...DEFAULT_SETTINGS.display, ...parsed.display },
+          gcode: { ...DEFAULT_SETTINGS.gcode, ...parsed.gcode }
         };
         settingsStore.set(mergedSettings);
         return mergedSettings;
@@ -45,7 +49,8 @@ export function updateSettings(newSettings: Partial<Settings>): void {
   const currentSettings = settingsStore.get();
   const updatedSettings = {
     preview: { ...currentSettings.preview, ...(newSettings.preview || {}) },
-    display: { ...currentSettings.display, ...(newSettings.display || {}) }
+    display: { ...currentSettings.display, ...(newSettings.display || {}) },
+    gcode: { ...currentSettings.gcode, ...(newSettings.gcode || {}) }
   };
   settingsStore.set(updatedSettings);
   if (typeof window !== 'undefined') {

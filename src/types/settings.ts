@@ -1,14 +1,22 @@
-// types/settings.ts
+export interface PreviewSettings {
+  renderTubes: boolean;
+  buildArea: boolean;
+}
+
+export interface DisplaySettings {
+  hideEmptyFilaments: boolean;
+  showTotalCost: boolean;
+  showPrinterInfo: boolean;
+  compactMode: boolean;
+  showPreview: boolean;
+}
+
+export interface GCodeSettings {
+  buildPlateSwap: string;
+}
+
 export interface Settings {
-    preview: {
-      renderTubes: boolean;
-      buildArea: boolean;
-    };
-    display: {
-      hideEmptyFilaments: boolean;
-      showTotalCost: boolean;
-      showPrinterInfo: boolean;
-      compactMode: boolean;
-      showPreview: boolean;
-    };
-  }
+  preview: PreviewSettings;
+  display: DisplaySettings;
+  gcode: GCodeSettings;
+}

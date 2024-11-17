@@ -1,39 +1,29 @@
 ---
-import type { ThemeIconProps } from '../types/theme';
+interface Props {
+  className?: string;
+}
 
-interface Props extends ThemeIconProps {}
-
-const { size = 20, className = '' } = Astro.props;
+const { className = 'w-5 h-5' } = Astro.props;
 ---
 
 <span class="dark:hidden" aria-hidden="true">
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
-    class={className}
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
+    class={`${className} dark:hidden`} 
     fill="none" 
-    stroke="currentColor" 
-    stroke-width="2" 
-    stroke-linecap="round" 
-    stroke-linejoin="round"
+    viewBox="0 0 24 24" 
+    stroke="currentColor"
   >
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
   </svg>
 </span>
 <span class="hidden dark:inline" aria-hidden="true">
   <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    class={className}
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    stroke-width="2" 
-    stroke-linecap="round" 
-    stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg" 
+  class={`${className} hidden dark:block`} 
+  fill="none" 
+  viewBox="0 0 24 24" 
+  stroke="currentColor"
   >
     <circle cx="12" cy="12" r="5"/>
     <line x1="12" y1="1" x2="12" y2="3"/>

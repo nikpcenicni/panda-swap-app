@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { Theme } from '../types/theme';
+import type { Theme } from '../utils/theme-handlers';
 
 export const THEME_STORAGE_KEY = 'theme-preference';
 

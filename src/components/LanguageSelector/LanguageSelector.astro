@@ -1,0 +1,35 @@
+---
+import { getCurrentLanguage, useTranslations, getAvailableLanguages } from '../../i18n/utils';
+import LanguageButton from './LanguageButton.astro';
+import LanguageDropdown from './LanguageDropDown.astro';
+
+const currentLang = getCurrentLanguage();
+const { t } = useTranslations(currentLang);
+const availableLanguages = getAvailableLanguages();
+---
+
+<div class="relative">
+  <LanguageButton 
+    currentLang={currentLang} 
+    label={t('common.language')} 
+  />
+  <LanguageDropdown 
+    languages={availableLanguages} 
+    currentLang={currentLang} 
+  />
+</div>
+
+<script>
+  import { setupLanguageHandlers } from '../../utils/language-handlers';
+  import { setLanguage } from '../../i18n/utils';
+
+  // Initialize language handlers
+  setupLanguageHandlers(
+    'language-select',
+    'language-dropdown',
+    (lang) => {
+      setLanguage(lang);
+      location.reload(); // Reload to apply new language
+    }
+  );
+</script>

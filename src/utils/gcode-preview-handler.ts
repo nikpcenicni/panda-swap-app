@@ -1,6 +1,5 @@
 import type { GCodeFile } from '../types/gcode';
 import { getSettings } from '../store/settings-store';
-import { PREVIEW_CONFIG } from '../constants/gcode';
 import * as GCodePreview from 'gcode-preview';
 
 

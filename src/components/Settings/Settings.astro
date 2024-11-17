@@ -1,0 +1,151 @@
+---
+import SettingsIcon from './SettingsIcon.astro';
+import SettingsSection from './SettingsSection.astro';
+import ToggleSetting from './ToggleSetting.astro';
+import TextareaSetting from './TextareaSetting.astro';
+import { settingsStore } from '../../store/settings-store';
+
+const initialSettings = settingsStore.get();
+---
+
+<div class="relative" id="settings-menu">
+  <button
+    type="button"
+    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
+    aria-label="Settings"
+    id="settings-button"
+  >
+    <SettingsIcon />
+  </button>
+
+  <div
+    id="settings-panel"
+    class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 hidden z-50 border border-gray-200 dark:border-gray-700"
+  >
+    <div class="space-y-4">
+      <SettingsSection title="Preview Settings" group="preview">
+        <ToggleSetting
+          label="Show as Tubes"
+          name="renderTubes"
+          group="preview"
+          checked={initialSettings.preview.renderTubes}
+        />
+        <ToggleSetting
+          label="Show Build Volume"
+          name="buildArea"
+          group="preview"
+          checked={initialSettings.preview.buildArea}
+        />
+      </SettingsSection>
+
+      <SettingsSection title="GCode Settings" group="gcode">
+        <TextareaSetting
+          label="Build Plate Swap GCode"
+          name="buildPlateSwap"
+          group="gcode"
+          value={initialSettings.gcode.buildPlateSwap}
+        />
+      </SettingsSection>
+
+      <SettingsSection title="Display Settings" group="display">
+        <ToggleSetting
+          label="Hide Empty Filaments"
+          name="hideEmptyFilaments"
+          group="display"
+          checked={initialSettings.display.hideEmptyFilaments}
+        />
+        <ToggleSetting
+          label="Show Total Cost"
+          name="showTotalCost"
+          group="display"
+          checked={initialSettings.display.showTotalCost}
+        />
+        <ToggleSetting
+          label="Show Printer Info"
+          name="showPrinterInfo"
+          group="display"
+          checked={initialSettings.display.showPrinterInfo}
+        />
+        <ToggleSetting
+          label="Compact Mode"
+          name="compactMode"
+          group="display"
+          checked={initialSettings.display.compactMode}
+        />
+        <ToggleSetting
+          label="Show Preview"
+          name="showPreview"
+          group="display"
+          checked={initialSettings.display.showPreview}
+        />
+      </SettingsSection>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initSettings, settingsStore, type Settings } from '../../store/settings-store';
+  import { handleSettingChange, updateSettingsUI } from '../../utils/settings-handlers';
+
+  function setupSettingsMenu() {
+    const settingsButton = document.getElementById('settings-button');
+    const settingsPanel = document.getElementById('settings-panel');
+    const settingsMenu = document.getElementById('settings-menu');
+
+    if (!settingsButton || !settingsPanel || !settingsMenu) return;
+
+    function togglePanel(event: Event) {
+      event.stopPropagation();
+      if (settingsPanel)
+      settingsPanel.classList.toggle('hidden');
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsPanel){
+        if (!settingsPanel.contains(event.target as Node)) {
+            settingsPanel.classList.add('hidden');
+        }
+      }
+    }
+
+    // Handle settings changes
+    settingsPanel.addEventListener('change', (event) => {
+      const target = event.target as HTMLInputElement;
+      if (!target.dataset.settingsGroup) return;
+      handleSettingChange(target, target.dataset.settingsGroup as keyof Settings);
+    });
+
+    // Handle textarea input
+    settingsPanel.addEventListener('input', (event) => {
+      const target = event.target as HTMLTextAreaElement;
+      if (!target.dataset.settingsGroup || target.tagName !== 'TEXTAREA') return;
+      handleSettingChange(target, target.dataset.settingsGroup as keyof Settings);
+    });
+
+    // Subscribe to settings changes
+    settingsStore.subscribe((settings) => {
+      updateSettingsUI(settingsPanel, settings);
+    });
+
+    // Add event listeners
+    settingsButton.addEventListener('click', togglePanel);
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      settingsButton.removeEventListener('click', togglePanel);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }
+
+  // Initialize settings
+  document.addEventListener('astro:page-load', () => {
+    initSettings();
+    setupSettingsMenu();
+  });
+
+  if (document.readyState === 'complete') {
+    setupSettingsMenu();
+  } else {
+    window.addEventListener('load', setupSettingsMenu);
+  }
+</script>

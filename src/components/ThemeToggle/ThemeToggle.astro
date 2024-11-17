@@ -1,0 +1,31 @@
+---
+import ThemeIcons from './ThemeIcons.astro';
+import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
+
+const { t } = useTranslations(getCurrentLanguage());
+---
+
+<button
+  id="theme-toggle"
+  type="button"
+  class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
+  aria-label={t('common.toggleTheme')}
+>
+  <ThemeIcons className="w-5 h-5" />
+</button>
+
+<script>
+  import { initTheme, toggleTheme, setupThemeListeners } from '../../utils/theme-handlers';
+
+  // Initialize theme
+  initTheme();
+
+  // Add click handler
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+
+  // Setup theme listeners
+  setupThemeListeners();
+</script>
