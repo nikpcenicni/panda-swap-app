@@ -1,4 +1,6 @@
-import { LANG_STORAGE_KEY, type TranslationKeys, languageNames } from './config';
+import { type TranslationKeys, languageNames } from './config';
+import type { SupportedLanguage } from '../store/languageStore';
+import { languageStore, getServerSideLanguage } from '../store/languageStore';
 
 const translations = new Map<string, TranslationKeys>();
 
@@ -24,18 +26,9 @@ export function getAvailableLanguages(): Record<string, string> {
 }
 
 export function getCurrentLanguage(): string {
-  if (typeof window === 'undefined') return 'en';
-  const storedLang = localStorage.getItem(LANG_STORAGE_KEY);
-  if (storedLang && translations.has(storedLang)) {
-    return storedLang;
-  }
-  // Try to match browser language with available translations
-  const browserLang = navigator.language.split('-')[0];
-  if (translations.has(browserLang)) {
-    return browserLang;
-  }
-  // Default to first available language, preferring English if available
-  return translations.has('en') ? 'en' : Array.from(translations.keys())[0];
+  return typeof window === 'undefined' 
+    ? getServerSideLanguage()
+    : languageStore.get();
 }
 
 export function setLanguage(lang: string) {
@@ -43,9 +36,11 @@ export function setLanguage(lang: string) {
     console.warn(`Translation for language ${lang} not found`);
     return;
   }
-  localStorage.setItem(LANG_STORAGE_KEY, lang);
-  document.documentElement.setAttribute('lang', lang);
-  window.dispatchEvent(new CustomEvent('language-change'));
+  
+  languageStore.set(lang as SupportedLanguage);
+  window.dispatchEvent(new CustomEvent('language-change', { 
+    detail: { language: lang } 
+  }));
 }
 
 // Single interpolation function that handles {variable} format

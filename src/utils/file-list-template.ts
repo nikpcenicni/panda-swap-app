@@ -1,9 +1,12 @@
-import { useTranslations } from '../i18n/utils.ts';
+import { languageStore } from '../store/languageStore';
+import { useTranslations } from '../i18n/utils';
 import type { GCodeFile } from '../types/gcode';
-import { formatTime } from './format-helpers.ts';
+import { formatTime } from './format-helpers';
 
-export function generateFileItemHTML(file: GCodeFile, lang: string): string {
-  const { t } = useTranslations(lang);
+export function generateFileItemHTML(file: GCodeFile): string {
+  const currentLang = languageStore.get();
+  const { t } = useTranslations(currentLang);
+
   return `
     <div
       class="file-item bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 transform"
@@ -15,8 +18,9 @@ export function generateFileItemHTML(file: GCodeFile, lang: string): string {
           <label
             for="quantity-${file.id}"
             class="text-sm font-medium text-gray-700 dark:text-gray-300"
+            data-i18n-key="fileList.quantity.label"
           >
-            Print Quantity
+            ${t('fileList.quantity.label')}
           </label>
           <input
             id="quantity-${file.id}"
@@ -29,28 +33,33 @@ export function generateFileItemHTML(file: GCodeFile, lang: string): string {
         </div>
         <button
           class="drag-handle p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-grab active:cursor-grabbing"
-          aria-label="Drag to reorder"
+          aria-label="${t('fileList.dragHandle')}"
+          data-i18n-key="fileList.dragHandle"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            class="h-6 w-6" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path 
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-width="2" 
-              d="M4 8h16M4 16h16" 
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 8h16M4 16h16"
             />
           </svg>
         </button>
       </div>
       <div class="gcode-preview-container"></div>
       <div class="mt-4">
-        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">File: ${file.metadata.plateName}</h4>
-        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Filament Usage:</h4>
+        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n-key="fileList.fileInfo.file" data-i18n-params='{"name":"${file.metadata.plateName}"}'>
+          ${t('fileList.fileInfo.file', { name: file.metadata.plateName })}
+        </h4>
+        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n-key="fileList.fileInfo.filamentUsage">
+          ${t('fileList.fileInfo.filamentUsage')}
+        </h4>
         <ul class="space-y-2">
           ${file.metadata.colors
             .filter(color => color.weight > 0)
@@ -69,13 +78,17 @@ export function generateFileItemHTML(file: GCodeFile, lang: string): string {
         </ul>
         <div class="mt-4 grid grid-cols-2 gap-4">
           <div>
-            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Print Time:</h4>
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n-key="fileList.fileInfo.printTime">
+              ${t('fileList.fileInfo.printTime')}
+            </h4>
             <p class="text-gray-600 dark:text-gray-400">
               ${formatTime(file.metadata.totalTime)}
             </p>
           </div>
           <div>
-            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Total Time:</h4>
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2" data-i18n-key="fileList.fileInfo.totalTime">
+              ${t('fileList.fileInfo.totalTime')}
+            </h4>
             <p class="text-gray-600 dark:text-gray-400">
               ${formatTime(file.metadata.estimatedTime)}
             </p>

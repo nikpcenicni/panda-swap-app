@@ -12,6 +12,10 @@ const translations: TranslationKeys = {
     settings: 'Settings',
     language: 'Language'
   },
+  error: {
+    invalidFile: "Invalid File",
+    uploadFailed: "Upload Failed",
+  },
   settings: {
     preview: {
       title: 'Preview Settings',
@@ -23,7 +27,9 @@ const translations: TranslationKeys = {
     title: 'Upload GCODE Files',
     dragDrop: 'Drag and drop your GCODE files here',
     or: 'or',
-    browse: 'Browse files'
+    browse: 'Browse files',
+    fileListLabel: 'File List',
+    inputLabel: 'File Input',
   },
   printSummary: {
     title: "Print Summary",

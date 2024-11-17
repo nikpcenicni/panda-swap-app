@@ -19,11 +19,17 @@ export type TranslationKeys = {
         showGrid: string;
       }
     };
+    error: {
+      invalidFile: string;
+      uploadFailed: string;
+    }
     fileUpload: {
       title: string;
       dragDrop: string;
       or: string;
       browse: string;
+      fileListLabel: string;
+      inputLabel: string
     };
     printSummary: {
         title: string;

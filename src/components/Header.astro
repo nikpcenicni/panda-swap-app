@@ -15,12 +15,21 @@ const { title = t('common.title') } = Astro.props;
 <header class="w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
   <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
+      <h1 
+      class="text-2xl font-bold text-gray-900 dark:text-white"
+      data-i18n-key={title === t('common.title') ? 'common.title' : null}
+    >
+      {title}
+    </h1>
       <div class="flex items-center space-x-2">
-       
+        <LanguageSelector />
         <Settings />
         <ThemeToggle />
       </div>
     </div>
   </div>
 </header>
+<script>
+  import { setupTranslationObservers } from '../utils/translations-handlers';
+  setupTranslationObservers();
+</script>
