@@ -5,7 +5,6 @@ import PrinterInfo from './PrinterInfo.astro';
 import TotalStats from './TotalStats.astro';
 import { filesStore } from '../../store/file-store';
 import { settingsStore } from '../../store/settings-store';
-import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
 import { calculateTotalTime, calculatePrinterModels } from '../../utils/PrintSummary/gcode-handlers';
 
 const initialFiles = filesStore.get();
