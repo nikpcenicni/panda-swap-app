@@ -26,75 +26,62 @@ const { t } = useTranslations(currentLang);
     class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 hidden z-50 border border-gray-200 dark:border-gray-700"
   >
     <div class="space-y-4">
-      <div class="settings-section" data-section="preview">
-        <h3 class="text-lg font-medium mb-2" data-i18n="settings.preview.title">
-          {t('settings.preview.title')}
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              class="form-checkbox"
-              name="renderTubes"
-              data-settings-group="preview"
-              checked={initialSettings.preview.renderTubes}
-            />
-            <span data-i18n="settings.preview.renderTubes">{t('settings.preview.renderTubes')}</span>
-          </label>
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              class="form-checkbox"
-              name="buildArea"
-              data-settings-group="preview"
-              checked={initialSettings.preview.buildArea}
-            />
-            <span data-i18n="settings.preview.buildArea">{t('settings.preview.buildArea')}</span>
-          </label>
-        </div>
-      </div>
+      <SettingsSection title={t('settings.preview.title')} group="preview">
+        <ToggleSetting
+          label={t('settings.preview.renderTubes')}
+          name="renderTubes"
+          group="preview"
+          checked={initialSettings.preview.renderTubes}
+        />
+        <ToggleSetting
+          label={t('settings.preview.buildArea')}
+          name="buildArea"
+          group="preview"
+          checked={initialSettings.preview.buildArea}
+        />
+      </SettingsSection>
 
-      <div class="settings-section" data-section="gcode">
-        <h3 class="text-lg font-medium mb-2" data-i18n="settings.gcode.title">
-          {t('settings.gcode.title')}
-        </h3>
-        <div class="space-y-2">
-          <label class="block">
-            <span data-i18n="settings.gcode.buildPlateSwap">{t('settings.gcode.buildPlateSwap')}</span>
-            <textarea
-              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              name="buildPlateSwap"
-              data-settings-group="gcode"
-            >{initialSettings.gcode.buildPlateSwap}</textarea>
-          </label>
-        </div>
-      </div>
+      <SettingsSection title={t('settings.gcode.title')} group="gcode">
+        <TextareaSetting
+          label={t('settings.gcode.buildPlateSwap')}
+          name="buildPlateSwap"
+          group="gcode"
+          value={initialSettings.gcode.buildPlateSwap}
+        />
+      </SettingsSection>
 
-      <div class="settings-section" data-section="display">
-        <h3 class="text-lg font-medium mb-2" data-i18n="settings.display.title">
-          {t('settings.display.title')}
-        </h3>
-        <div class="space-y-2">
-          {Object.entries({
-            hideEmptyFilaments: initialSettings.display.hideEmptyFilaments,
-            showTotalCost: initialSettings.display.showTotalCost,
-            showPrinterInfo: initialSettings.display.showPrinterInfo,
-            compactMode: initialSettings.display.compactMode,
-            showPreview: initialSettings.display.showPreview,
-          }).map(([key, value]) => (
-            <label class="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                class="form-checkbox"
-                name={key}
-                data-settings-group="display"
-                checked={value}
-              />
-              <span data-i18n={`settings.display.${key}`}>{t(`settings.display.${key}`)}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <SettingsSection title={t('settings.display.title')} group="display">
+        <ToggleSetting
+          label={t('settings.display.hideEmptyFilaments')}
+          name="hideEmptyFilaments"
+          group="display"
+          checked={initialSettings.display.hideEmptyFilaments}
+        />
+        <ToggleSetting
+          label={t('settings.display.showTotalCost')}
+          name="showTotalCost"
+          group="display"
+          checked={initialSettings.display.showTotalCost}
+        />
+        <ToggleSetting
+          label={t('settings.display.showPrinterInfo')}
+          name="showPrinterInfo"
+          group="display"
+          checked={initialSettings.display.showPrinterInfo}
+        />
+        <ToggleSetting
+          label={t('settings.display.compactMode')}
+          name="compactMode"
+          group="display"
+          checked={initialSettings.display.compactMode}
+        />
+        <ToggleSetting
+          label={t('settings.display.showPreview')}
+          name="showPreview"
+          group="display"
+          checked={initialSettings.display.showPreview}
+        />
+      </SettingsSection>
     </div>
   </div>
 </div>
@@ -133,7 +120,7 @@ const { t } = useTranslations(currentLang);
     }
 
     function handleClickOutside(event: MouseEvent) {
-      if (settingsPanel)
+      if(settingsPanel)
       if (!settingsPanel.contains(event.target as Node)) {
         settingsPanel.classList.add('hidden');
       }
