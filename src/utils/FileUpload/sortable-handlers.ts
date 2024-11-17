@@ -1,6 +1,5 @@
 import Sortable from 'sortablejs';
 import { filesStore } from '../../store/file-store';
-import type { GCodeFile } from '../../types/gcode';
 
 export function initializeSortable(fileList: HTMLElement): void {
   // Remove any existing Sortable instance

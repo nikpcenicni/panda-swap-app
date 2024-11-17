@@ -8,19 +8,6 @@ import { getCurrentLanguage, useTranslations } from '../i18n/utils';
 // Initialize translations
 const { t } = useTranslations(getCurrentLanguage());
 
-// This would normally come from your data store/backend
-const files: { 
-  id: string; 
-  name: string; 
-  quantity: number; 
-  metadata: { 
-    plateName: string; 
-    colors: Array<{ color: string; weight: number; }>; 
-    totalTime: number; 
-    modelImage?: string; 
-  }; 
-}[] = [];
-
 // Pre-compute initial translations
 const pageTranslations = {
   title: t('app.title'),

@@ -39,8 +39,6 @@ export function parseGCodeFile(content: string, fileName: string): FileMetadata 
     }
   }
 
-  // Extract printer model from header
-  const printerModelMatch = lines.find(line => line.includes('; printer_model =') );
   // Parse filament weights
   const printerModelLine = lines.find(line => line.includes('; printer_model ='));
   let printerModel: string = "";

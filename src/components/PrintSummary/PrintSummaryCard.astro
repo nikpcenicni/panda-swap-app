@@ -8,7 +8,6 @@ import { settingsStore } from '../../store/settings-store';
 import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
 import { calculateTotalTime, calculatePrinterModels } from '../../utils/PrintSummary/gcode-handlers';
 
-const { t } = useTranslations(getCurrentLanguage());
 const initialFiles = filesStore.get();
 const settings = settingsStore.get();
 const totalTime = calculateTotalTime(initialFiles);
