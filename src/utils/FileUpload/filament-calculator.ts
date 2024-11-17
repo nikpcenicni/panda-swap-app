@@ -15,7 +15,7 @@ export interface FilamentUsageData {
 
 interface Settings {
   display: {
-    hideEmptyFilaments: boolean;
+    emptyFilaments: boolean;
     showTotalCost: boolean;
     compactMode: boolean;
   };
@@ -51,8 +51,8 @@ export function calculateFilamentUsage(files: readonly GCodeFile[], settings: Se
     };
   });
 
-  // Filter out empty slots if hideEmptyFilaments is true
-  if (settings.display.hideEmptyFilaments) {
+  // Filter out empty slots if emptyFilaments is true
+  if (!settings.display.emptyFilaments) {
     usageData = usageData.filter(data => data.weight > 0);
   }
 

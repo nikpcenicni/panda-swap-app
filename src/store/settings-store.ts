@@ -7,13 +7,13 @@ export const DEFAULT_SETTINGS: Settings = {
   preview: {
     renderTubes: true,
     buildArea: true,
+    showPreview: true
   },
   display: {
-    hideEmptyFilaments: false,
+    emptyFilaments: false,
     showTotalCost: true,
     showPrinterInfo: true,
-    compactMode: false,
-    showPreview: true
+    compactMode: true,
   },
   gcode: {
     buildPlateSwap: "",

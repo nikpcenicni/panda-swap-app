@@ -28,7 +28,7 @@ const translations: TranslationKeys = {
     },
     display: {
       title: 'Display Settings',
-      hideEmptyFilaments: 'Hide Empty Filaments',
+      emptyFilaments: 'Unused Filament',
       showTotalCost: 'Show Total Cost',
       showPrinterInfo: 'Show Printer Info',
       compactMode: 'Compact Mode',

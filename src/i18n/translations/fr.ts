@@ -28,7 +28,7 @@ const translations: TranslationKeys = {
     },
     display: {
       title: "Paramètres d'affichage",
-      hideEmptyFilaments: 'Cacher les filaments vides',
+      emptyFilaments: 'Cacher les filaments vides',
       showTotalCost: 'Afficher le coût total',
       showPrinterInfo: "Afficher les informations sur l'imprimante",
       compactMode: 'Mode compact',

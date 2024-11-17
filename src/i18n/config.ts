@@ -24,7 +24,7 @@ export type TranslationKeys = {
       };
       display: {
         title: string;
-        hideEmptyFilaments: string;
+        emptyFilaments: string;
         showTotalCost: string;
         showPrinterInfo: string;
         compactMode: string;

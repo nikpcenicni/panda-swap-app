@@ -1,14 +1,14 @@
 export interface PreviewSettings {
   renderTubes: boolean;
   buildArea: boolean;
+  showPreview: boolean;
 }
 
 export interface DisplaySettings {
-  hideEmptyFilaments: boolean;
+  emptyFilaments: boolean;
   showTotalCost: boolean;
   showPrinterInfo: boolean;
   compactMode: boolean;
-  showPreview: boolean;
 }
 
 export interface GCodeSettings {

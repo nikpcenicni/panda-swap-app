@@ -39,6 +39,12 @@ const { t } = useTranslations(currentLang);
           group="preview"
           checked={initialSettings.preview.buildArea}
         />
+        <ToggleSetting
+        label={t('settings.display.showPreview')}
+        name="showPreview"
+        group="display"
+        checked={initialSettings.preview.showPreview}
+      />
       </SettingsSection>
 
       <SettingsSection title={t('settings.gcode.title')} group="gcode">
@@ -52,10 +58,10 @@ const { t } = useTranslations(currentLang);
 
       <SettingsSection title={t('settings.display.title')} group="display">
         <ToggleSetting
-          label={t('settings.display.hideEmptyFilaments')}
-          name="hideEmptyFilaments"
+          label={t('settings.display.emptyFilaments')}
+          name="emptyFilaments"
           group="display"
-          checked={initialSettings.display.hideEmptyFilaments}
+          checked={initialSettings.display.emptyFilaments}
         />
         <ToggleSetting
           label={t('settings.display.showTotalCost')}
@@ -74,12 +80,6 @@ const { t } = useTranslations(currentLang);
           name="compactMode"
           group="display"
           checked={initialSettings.display.compactMode}
-        />
-        <ToggleSetting
-          label={t('settings.display.showPreview')}
-          name="showPreview"
-          group="display"
-          checked={initialSettings.display.showPreview}
         />
       </SettingsSection>
     </div>
