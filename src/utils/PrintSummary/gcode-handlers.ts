@@ -1,4 +1,4 @@
-import type { GCodeFile } from '../types/gcode';
+import type { GCodeFile } from '../../types/gcode';
 
 export function compileGCode(files: readonly GCodeFile[]): string {
   let compiledGCode = '; Compiled GCode File\n';

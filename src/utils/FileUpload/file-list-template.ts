@@ -1,7 +1,7 @@
-import { languageStore } from '../store/languageStore';
-import { useTranslations } from '../i18n/utils';
-import type { GCodeFile } from '../types/gcode';
-import { formatTime } from './format-helpers';
+import { languageStore } from '../../store/language-store';
+import { useTranslations } from '../../i18n/utils';
+import type { GCodeFile } from '../../types/gcode';
+import { formatTime } from '../format-handlers';
 
 export function generateFileItemHTML(file: GCodeFile): string {
   const currentLang = languageStore.get();

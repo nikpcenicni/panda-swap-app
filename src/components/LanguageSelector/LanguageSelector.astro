@@ -1,5 +1,5 @@
 ---
-import { getServerSideLanguage } from '../../store/languageStore';
+import { getServerSideLanguage } from '../../store/language-store';
 import { useTranslations, getAvailableLanguages } from '../../i18n/utils';
 import LanguageButton from './LanguageButton.astro';
 import LanguageDropdown from './LanguageDropDown.astro';
@@ -21,8 +21,8 @@ const availableLanguages = getAvailableLanguages();
 </div>
 
 <script>
-  import { languageStore } from '../../store/languageStore';
-  import { setupLanguageHandlers } from '../../utils/language-handlers';
+  import { languageStore } from '../../store/language-store.ts';
+  import { setupLanguageHandlers } from '../../utils/i18n/language-handlers.ts';
   import { setLanguage } from '../../i18n/utils';
 
   function updateContent() {

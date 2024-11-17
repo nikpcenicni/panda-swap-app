@@ -1,9 +1,9 @@
-import { filesStore } from '../../store/fileStore';
+import { filesStore } from '../../store/file-store';
 import { settingsStore } from '../../store/settings-store';
 import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
-import { compileGCode, downloadGCode, calculateTotalTime } from '../../utils/gcode-helpers';
-import { updateFilamentDisplay } from './filamentDisplayHandler';
-import { formatTime } from '../../utils/format-helpers';
+import { compileGCode, downloadGCode, calculateTotalTime } from '../../utils/PrintSummary/gcode-handlers';
+import { updateFilamentDisplay } from './filamentDisplayHandlers';
+import { formatTime } from '../../utils/format-handlers';
 
 export function setupPrintSummaryHandlers(): void {
   function initializeTranslations() {

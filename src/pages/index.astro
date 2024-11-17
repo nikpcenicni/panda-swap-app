@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import FileUploadCard from '../components/FileUpload/FileUploadCard.astro';
-import PrintSummary from '../components/PrintSummary.astro';
 import PrintSummaryCard from '../components/PrintSummary/PrintSummaryCard.astro';
 import { getCurrentLanguage, useTranslations } from '../i18n/utils';
 
@@ -42,7 +41,6 @@ const pageTranslations = {
         {t('app.welcome')}
       </h1>
       <PrintSummaryCard />
-      <!-- <PrintSummary files={files} /> -->
       <FileUploadCard />
     </div>
   </main>

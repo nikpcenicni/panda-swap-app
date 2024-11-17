@@ -1,5 +1,5 @@
 import type { GCodeFile } from '../../types/gcode';
-import { calculateFilamentUsage, calculateTotalCost, generateFilamentDisplayHTML } from '../../utils/filament-calculator';
+import { calculateFilamentUsage, calculateTotalCost, generateFilamentDisplayHTML } from '../../utils/FileUpload/filament-calculator';
 import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
 
 export function updateFilamentDisplay(files: readonly GCodeFile[], settings: any): void {

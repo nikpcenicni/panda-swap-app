@@ -1,10 +1,10 @@
-import { filesStore, type GCodeFile } from '../../store/fileStore';
-import { processFiles } from '../../utils/file-handlers';
-import { UI_CONFIG } from '../../types/gcode';
-import { initializeGCodePreview } from '../../utils/gcode-preview-handler';
-import { initializeSortable } from '../../utils/sortable-handler';
-import { generateFileItemHTML } from '../../utils/file-list-template';
-import { setupTranslationObservers } from '../../utils/translations-handlers';
+import { filesStore, type GCodeFile } from '../../store/file-store.ts';
+import { processFiles } from '../../utils/FileUpload/file-handlers.ts';
+import { UI_CONFIG } from '../../types/gcode.ts';
+import { initializeGCodePreview } from '../../utils/FileUpload/gcode-preview-handlers.ts';
+import { initializeSortable } from '../../utils/FileUpload/sortable-handlers.ts';
+import { generateFileItemHTML } from '../../utils/FileUpload/file-list-template.ts';
+import { setupTranslationObservers } from '../../utils/i18n/translations-handlers.ts';
 
 export function setupFileUploadHandlers(): void {
   const dropzone = document.getElementById('dropzone');

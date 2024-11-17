@@ -1,5 +1,5 @@
-import type { GCodeFile } from '../types/gcode';
-import { getSettings } from '../store/settings-store';
+import type { GCodeFile } from '../../types/gcode';
+import { getSettings } from '../../store/settings-store';
 import * as GCodePreview from 'gcode-preview';
 
 

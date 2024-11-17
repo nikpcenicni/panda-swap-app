@@ -3,10 +3,10 @@ import CompileButton from './CompileButton.astro';
 import FilamentUsage from './FilamentUsage.astro';
 import PrinterInfo from './PrinterInfo.astro';
 import TotalStats from './TotalStats.astro';
-import { filesStore } from '../../store/fileStore';
+import { filesStore } from '../../store/file-store';
 import { settingsStore } from '../../store/settings-store';
 import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
-import { calculateTotalTime, calculatePrinterModels } from '../../utils/gcode-helpers';
+import { calculateTotalTime, calculatePrinterModels } from '../../utils/PrintSummary/gcode-handlers';
 
 const { t } = useTranslations(getCurrentLanguage());
 const initialFiles = filesStore.get();
@@ -34,6 +34,6 @@ const printerModels = calculatePrinterModels(initialFiles);
 </div>
 
 <script>
-  import { setupPrintSummaryHandlers } from './printSummary-Handlers';
+  import { setupPrintSummaryHandlers } from './printSummaryHandlers';
   setupPrintSummaryHandlers();
 </script>

@@ -1,5 +1,5 @@
-import { languageStore, type SupportedLanguage } from '../store/languageStore';
-import { getCurrentLanguage, setLanguage } from '../i18n/utils';
+import { languageStore, type SupportedLanguage } from '../../store/language-store.ts';
+import { getCurrentLanguage, setLanguage } from '../../i18n/utils';
 
 export function setupLanguageHandlers(
   selectButtonId: string,

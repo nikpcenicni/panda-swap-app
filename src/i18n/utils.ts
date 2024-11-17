@@ -1,6 +1,6 @@
 import { type TranslationKeys, languageNames } from './config';
-import type { SupportedLanguage } from '../store/languageStore';
-import { languageStore, getServerSideLanguage } from '../store/languageStore';
+import type { SupportedLanguage } from '../store/language-store';
+import { languageStore, getServerSideLanguage } from '../store/language-store';
 
 const translations = new Map<string, TranslationKeys>();
 

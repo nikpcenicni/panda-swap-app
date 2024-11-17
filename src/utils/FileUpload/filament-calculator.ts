@@ -1,6 +1,6 @@
 // src/utils/filament-calculator.ts
-import type { GCodeFile } from '../types/gcode';
-import { getCurrentLanguage, useTranslations } from '../i18n/utils';
+import type { GCodeFile } from '../../types/gcode';
+import { getCurrentLanguage, useTranslations } from '../../i18n/utils';
 import tinycolor from 'tinycolor2';
 
 export interface FilamentUsageData {

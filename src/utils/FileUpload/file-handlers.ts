@@ -1,6 +1,6 @@
-import type { GCodeFile, Color } from '../types/gcode';
-import { parseGCodeFile } from './gcodeParser';
-import { filesStore } from '../store/fileStore';
+import type { GCodeFile, Color } from '../../types/gcode';
+import { parseGCodeFile } from './gcode-parser.ts';
+import { filesStore } from '../../store/file-store';
 
 export interface FileHandlerCallbacks {
   onError: (message: string) => void;

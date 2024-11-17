@@ -21,7 +21,7 @@ const { currentLang, label } = Astro.props;
 </button>
 
 <script>
-  import { languageStore } from '../../store/languageStore';
+  import { languageStore } from '../../store/language-store.ts';
 
   // Update button text when language changes
   const button = document.getElementById('language-select');

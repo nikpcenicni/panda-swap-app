@@ -3,8 +3,8 @@ import Card from '../Card.astro';
 import FileList from './FileList.astro';
 import UploadZone from './UploadZone.astro';
 import ErrorMessage from './ErrorMessage.astro';
-import { filesStore } from '../../store/fileStore';
-import { getServerSideLanguage } from '../../store/languageStore';
+import { filesStore } from '../../store/file-store';
+import { getServerSideLanguage } from '../../store/language-store';
 import { useTranslations } from '../../i18n/utils';
 
 const currentLang = getServerSideLanguage();
@@ -32,6 +32,6 @@ const initialFiles = filesStore.get();
 </Card>
 
 <script>
-  import { setupFileUploadHandlers } from './fileUpload-handlers';
+  import { setupFileUploadHandlers } from './fileUploadHandlers';
   setupFileUploadHandlers();
 </script>

@@ -88,7 +88,7 @@ const { t } = useTranslations(currentLang);
 
 <script>
   import { initSettings, settingsStore, type Settings } from '../../store/settings-store';
-  import { handleSettingChange, updateSettingsUI } from '../../utils/settings-handlers';
+  import { handleSettingChange, updateSettingsUI } from '../../utils/settings-handlers.ts';
   import { useTranslations } from '../../i18n/utils';
 
   function updateTranslations() {

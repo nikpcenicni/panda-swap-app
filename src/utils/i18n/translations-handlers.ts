@@ -1,6 +1,6 @@
 // utils/translation-handlers.ts
-import { languageStore } from '../store/languageStore';
-import { useTranslations } from '../i18n/utils';
+import { languageStore } from '../../store/language-store';
+import { useTranslations } from '../../i18n/utils';
 
 export function setupTranslationObservers() {
   function updateTranslations() {
