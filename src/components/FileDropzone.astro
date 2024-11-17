@@ -1,17 +1,43 @@
 ---
-import Card from './Card.astro';
+import Card from '../components/Card.astro';
 import { filesStore } from '../store/fileStore';
+import { languageStore } from '../store/languageStore';
 import type { GCodeFile } from '../types/gcode';
 import { generateFileItemHTML } from '../utils/file-list-template';
-import { getCurrentLanguage, useTranslations } from '../i18n/utils';
+import { useTranslations } from '../i18n/utils';
 
-const { t } = useTranslations(getCurrentLanguage());
+interface Props {
+  className?: string;
+}
+
+const { className } = Astro.props;
+const currentLang = languageStore.get();
+const { t } = useTranslations(currentLang);
 const initialFiles: readonly GCodeFile[] = filesStore.get();
+
+// Pre-translate strings for hydration
+const translations = {
+  title: t('fileUpload.title'),
+  dragDrop: t('fileUpload.dragDrop'),
+  or: t('fileUpload.or'),
+  browse: t('fileUpload.browse'),
+  error: {
+    invalidFile: t('fileUpload.error.invalidFile'),
+    uploadFailed: t('fileUpload.error.uploadFailed')
+  }
+} as const;
 ---
-<Card title={t('fileUpload.title')} className="h-full flex flex-col">
+
+<Card 
+  title={translations.title} 
+  className={`h-full flex flex-col ${className}`}
+  data-component="file-upload"
+>
   <div
     id="dropzone"
     class="flex-1 flex flex-col border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center transition-all duration-300"
+    data-translations={JSON.stringify(translations)}
+    data-language={currentLang}
   >
     <input
       type="file"
@@ -19,15 +45,28 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
       accept=".gcode"
       class="hidden"
       multiple
+      aria-label={t('fileUpload.inputLabel')}
     />
     
-    <div id="file-list" class={`flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 overflow-y-auto ${initialFiles.length === 0 ? 'hidden' : ''}`}>
+    <div 
+      id="file-list" 
+      class={`flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 overflow-y-auto ${
+        initialFiles.length === 0 ? 'hidden' : ''
+      }`}
+      role="list"
+      aria-label={t('fileUpload.fileListLabel')}
+    >
       {initialFiles.map((file) => (
-        <Fragment set:html={generateFileItemHTML(file)} />
+        <Fragment set:html={generateFileItemHTML(file, currentLang)} />
       ))}
     </div>
 
-    <div id="initial-upload" class={`flex-1 flex items-center justify-center ${initialFiles.length > 0 ? 'hidden' : ''}`}>
+    <div 
+      id="initial-upload" 
+      class={`flex-1 flex items-center justify-center ${
+        initialFiles.length > 0 ? 'hidden' : ''
+      }`}
+    >
       <div class="text-center p-12">
         <svg
           class="mx-auto h-12 w-12 text-gray-400"
@@ -44,16 +83,27 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
           />
         </svg>
         <div class="mt-4">
-          <p class="text-lg text-gray-600 dark:text-gray-300">{t('fileUpload.dragDrop')}</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('fileUpload.or')}</p>
-          <button class="mt-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
-            {t('fileUpload.browse')}
+          <p class="text-lg text-gray-600 dark:text-gray-300" data-translate="dragDrop">
+            {translations.dragDrop}
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-translate="or">
+            {translations.or}
+          </p>
+          <button 
+            class="mt-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+            data-translate="browse"
+          >
+            {translations.browse}
           </button>
         </div>
       </div>
     </div>
 
-    <div class={`p-4 space-y-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${initialFiles.length === 0 ? 'hidden' : ''}`}>
+    <div 
+      class={`p-4 space-y-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 ${
+        initialFiles.length === 0 ? 'hidden' : ''
+      }`}
+    >
       <div class="flex items-center justify-center gap-3">
         <svg
           class="h-6 w-6 text-gray-400"
@@ -69,86 +119,213 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
             stroke-linejoin="round"
           />
         </svg>
-        <span class="text-gray-600 dark:text-gray-300">
-          {t('fileUpload.dragDrop')}
+        <span 
+          class="text-gray-600 dark:text-gray-300"
+          data-translate="dragDrop"
+        >
+          {translations.dragDrop}
         </span>
-        <span class="text-gray-600 dark:text-gray-300">{t('fileUpload.or')}</span>
-        <button class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
-          {t('fileUpload.browse')}
+        <span 
+          class="text-gray-600 dark:text-gray-300"
+          data-translate="or"
+        >
+          {translations.or}
+        </span>
+        <button 
+          class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+          data-translate="browse"
+        >
+          {translations.browse}
         </button>
       </div>
     </div>
 
-    <div id="error-message" class="text-red-500 dark:text-red-400 text-sm hidden p-2"></div>
+    <div 
+      id="error-message" 
+      class="text-red-500 dark:text-red-400 text-sm hidden p-2"
+      role="alert"
+      aria-live="polite"
+    >
+    </div>
   </div>
 </Card>
 
 <script>
-  import { filesStore, type GCodeFile } from '../store/fileStore';
+  import { filesStore } from '../store/fileStore';
+  import { languageStore, type SupportedLanguage } from '../store/languageStore';
+  import type { GCodeFile } from '../types/gcode';
   import { processFiles } from '../utils/file-handlers';
   import { UI_CONFIG } from '../types/gcode';
+  import { useTranslations } from '../i18n/utils';
   import { initializeGCodePreview } from '../utils/gcode-preview-handler';
   import { initializeSortable } from '../utils/sortable-handler';
   import { generateFileItemHTML } from '../utils/file-list-template';
 
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('file-input') as HTMLInputElement;
-  const errorMessage = document.getElementById('error-message');
-  const fileList = document.getElementById('file-list');
-  const initialUpload = document.getElementById('initial-upload');
-  const bottomUpload = document.querySelector('.p-4.space-y-2.border-t');
-
-  function updateFileList(files: readonly GCodeFile[]): void {
-    if (!fileList || !initialUpload || !bottomUpload) return;
-    
-    // Toggle visibility of elements based on files
-    fileList.classList.toggle('hidden', files.length === 0);
-    initialUpload.classList.toggle('hidden', files.length > 0);
-    bottomUpload.classList.toggle('hidden', files.length === 0);
-    
-    // Update file list content
-    fileList.innerHTML = files.map(generateFileItemHTML).join('');
-    
-    // Initialize GCodePreview for each container
-    document.querySelectorAll('.file-item').forEach(fileItem => {
-      const fileId = fileItem.getAttribute('data-file-id');
-      const file = files.find(f => f.id === fileId);
-      const container = fileItem.querySelector('.gcode-preview-container');
-      if (file && container) {
-        initializeGCodePreview(container as HTMLElement, file).catch(console.error);
-      }
-    });
-    
-    if (files.length > 0) {
-      initializeSortable(fileList);
-    }
+  interface Translations {
+    title: string;
+    dragDrop: string;
+    or: string;
+    browse: string;
+    error: {
+      invalidFile: string;
+      uploadFailed: string;
+    };
   }
 
-  function showError(message: string) {
-    if (errorMessage) {
-      errorMessage.textContent = message;
-      errorMessage.classList.remove('hidden');
-      setTimeout(() => {
-        errorMessage.classList.add('hidden');
-      }, UI_CONFIG.ERROR_TIMEOUT);
+  class FileUploadManager {
+    private readonly dropzone: HTMLElement;
+    private readonly fileInput: HTMLInputElement;
+    private readonly errorMessage: HTMLElement | null;
+    private readonly fileList: HTMLElement | null;
+    private readonly initialUpload: HTMLElement | null;
+    private readonly bottomUpload: HTMLElement | null;
+    private translations: Translations;
+    private currentLanguage: SupportedLanguage;
+    private readonly dropzoneActiveClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10'];
+
+    constructor(dropzone: HTMLElement) {
+      this.dropzone = dropzone;
+      this.fileInput = dropzone.querySelector('#file-input') as HTMLInputElement;
+      this.errorMessage = dropzone.querySelector('#error-message');
+      this.fileList = dropzone.querySelector('#file-list');
+      this.initialUpload = dropzone.querySelector('#initial-upload');
+      this.bottomUpload = dropzone.querySelector('.p-4.space-y-2.border-t');
+      this.translations = JSON.parse(dropzone.dataset.translations || '{}');
+      this.currentLanguage = (dropzone.dataset.language as SupportedLanguage) || 'en';
+
+      this.initialize();
     }
-  }
 
-  if (dropzone && fileInput) {
-    const dropzoneActiveClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10'];
+    private initialize(): void {
+      this.setupSubscriptions();
+      this.setupEventListeners();
+      this.initializeOnPageLoad();
+    }
 
-    // Initialize subscription
-    filesStore.subscribe(updateFileList);
+    private setupSubscriptions(): void {
+      languageStore.subscribe(this.handleLanguageChange.bind(this));
+      filesStore.subscribe(this.updateFileList.bind(this));
+    }
 
-    // Initialize Sortable on load
-    document.addEventListener('astro:page-load', () => {
-      if (fileList && filesStore.get().length > 0) {
-        initializeSortable(fileList);
+    private setupEventListeners(): void {
+      // Drag and drop events
+      this.dropzone.addEventListener('dragover', this.handleDragOver.bind(this));
+      this.dropzone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+      this.dropzone.addEventListener('drop', this.handleDrop.bind(this));
+
+      // File input events
+      document.addEventListener('click', this.handleBrowseClick.bind(this));
+      this.fileInput.addEventListener('change', this.handleFileInputChange.bind(this));
+
+      // Quantity change events
+      document.addEventListener('change', this.handleQuantityChange.bind(this));
+    }
+
+    private initializeOnPageLoad(): void {
+      document.addEventListener('astro:page-load', () => {
+        if (this.fileList && filesStore.get().length > 0) {
+          initializeSortable(this.fileList);
+        }
+      });
+    }
+
+    private async handleLanguageChange(newLang: SupportedLanguage): Promise<void> {
+      this.currentLanguage = newLang;
+      const { t } = useTranslations(newLang);
+      
+      this.translations = {
+        title: t('fileUpload.title'),
+        dragDrop: t('fileUpload.dragDrop'),
+        or: t('fileUpload.or'),
+        browse: t('fileUpload.browse'),
+        error: {
+          invalidFile: t('fileUpload.error.invalidFile'),
+          uploadFailed: t('fileUpload.error.uploadFailed')
+        }
+      };
+
+      this.updateTranslations();
+      this.updateFileList(filesStore.get());
+    }
+
+    private updateTranslations(): void {
+      this.dropzone.querySelectorAll('[data-translate]').forEach(el => {
+        const key = el.getAttribute('data-translate');
+        if (key) {
+          const value = key.includes('.')
+            ? key.split('.').reduce((obj, k) => obj?.[k], this.translations as any)
+            : this.translations[key as keyof Translations];
+          
+          if (value) {
+            el.textContent = value;
+          }
+        }
+      });
+    }
+
+    private updateFileList(files: readonly GCodeFile[]): void {
+      if (!this.fileList || !this.initialUpload || !this.bottomUpload) return;
+      
+      const hasFiles = files.length > 0;
+      this.fileList.classList.toggle('hidden', !hasFiles);
+      this.initialUpload.classList.toggle('hidden', hasFiles);
+      this.bottomUpload.classList.toggle('hidden', !hasFiles);
+      
+      this.fileList.innerHTML = files
+        .map(file => generateFileItemHTML(file, this.currentLanguage))
+        .join('');
+      
+      this.initializePreviews(files);
+      
+      if (hasFiles) {
+        initializeSortable(this.fileList);
       }
-    });
+    }
 
-    // Handle quantity changes
-    document.addEventListener('change', (e: Event) => {
+    private initializePreviews(files: readonly GCodeFile[]): void {
+      this.dropzone.querySelectorAll('.file-item').forEach(fileItem => {
+        const fileId = fileItem.getAttribute('data-file-id');
+        const file = files.find(f => f.id === fileId);
+        const container = fileItem.querySelector('.gcode-preview-container');
+        if (file && container instanceof HTMLElement) {
+          initializeGCodePreview(container, file).catch(console.error);
+        }
+      });
+    }
+
+    private handleDragOver(e: DragEvent): void {
+      e.preventDefault();
+      this.dropzone.classList.add(...this.dropzoneActiveClasses);
+    }
+
+    private handleDragLeave(): void {
+      this.dropzone.classList.remove(...this.dropzoneActiveClasses);
+    }
+
+    private async handleDrop(e: DragEvent): Promise<void> {
+      e.preventDefault();
+      this.dropzone.classList.remove(...this.dropzoneActiveClasses);
+      if (e.dataTransfer?.files) {
+        await this.processUploadedFiles(e.dataTransfer.files);
+      }
+    }
+
+    private handleBrowseClick(e: MouseEvent): void {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'BUTTON' && target.textContent?.includes(this.translations.browse)) {
+        this.fileInput.click();
+      }
+    }
+
+    private async handleFileInputChange(e: Event): Promise<void> {
+      const target = e.target as HTMLInputElement;
+      if (target.files) {
+        await this.processUploadedFiles(target.files);
+        target.value = '';
+      }
+    }
+
+    private handleQuantityChange(e: Event): void {
       const target = e.target as HTMLInputElement;
       if (target.matches('input[type="number"][data-file-id]')) {
         const fileId = target.dataset.fileId;
@@ -161,45 +338,38 @@ const initialFiles: readonly GCodeFile[] = filesStore.get();
           filesStore.set(newFiles);
         }
       }
-    });
+    }
 
-    // Highlight dropzone on drag over
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add(...dropzoneActiveClasses);
-    });
-
-    // Remove highlight on drag leave
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove(...dropzoneActiveClasses);
-    });
-
-    // Handle file drop
-    dropzone.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      dropzone.classList.remove(...dropzoneActiveClasses);
-      if (e.dataTransfer?.files) {
-        await processFiles(e.dataTransfer.files, { onError: showError });
+    private async processUploadedFiles(files: FileList): Promise<void> {
+      try {
+        await processFiles(files, {
+          onError: (message: string) => this.showError(message)
+        });
+      } catch (error) {
+        this.showError(this.translations.error.uploadFailed);
+        console.error('File processing error:', error);
       }
-    });
+    }
 
-    // Handle click to browse
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'BUTTON' && target.textContent?.includes('Browse files')) {
-        fileInput.click();
+    private showError(message: string): void {
+      if (this.errorMessage) {
+        this.errorMessage.textContent = message;
+        this.errorMessage.classList.remove('hidden');
+        setTimeout(() => {
+          if (this.errorMessage)
+          this.errorMessage.classList.add('hidden');
+        }, UI_CONFIG.ERROR_TIMEOUT);
       }
-    });
-
-    // Handle file selection through browse
-    fileInput.addEventListener('change', async (e) => {
-      const target = e.target as HTMLInputElement;
-      if (target.files) {
-        await processFiles(target.files, { onError: showError });
-        target.value = '';
-      }
-    });
+    }
   }
+
+  // Initialize all file upload components on the page
+  document.querySelectorAll('[data-component="file-upload"]').forEach(el => {
+    const dropzone = el.querySelector('#dropzone');
+    if (dropzone instanceof HTMLElement) {
+      new FileUploadManager(dropzone);
+    }
+  });
 </script>
 
 <style is:global>

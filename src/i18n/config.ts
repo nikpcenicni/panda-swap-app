@@ -17,9 +17,6 @@ export type TranslationKeys = {
         title: string;
         renderTubes: string;
         showGrid: string;
-        showAxes: string;
-        showShadows: string;
-        lineWidth: string;
       }
     };
     fileUpload: {

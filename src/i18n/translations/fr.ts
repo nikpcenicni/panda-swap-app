@@ -2,40 +2,37 @@ import type { TranslationKeys } from '../config';
 
 const translations: TranslationKeys = {
   app: {
-    title: "GCODE Manager",
-    description: "Manage and organize your GCODE files",
-    welcome: "Welcome to GCODE Manager",
+    title: "Échange de pandas",
+    description: "Mise en file d'attente des fichiers d'impression pour Échange de pandas",
+    welcome: "Bienvenue à Échange de pandas",
   },
   common: {
-    title: 'Panda Swap',
+    title: 'Échange de pandas',
     toggleTheme: 'Toggle theme',
-    settings: 'Settings',
-    language: 'Language'
+    settings: 'Paramètres',
+    language: 'Langue'
   },
   settings: {
     preview: {
-      title: 'Preview Settings',
-      renderTubes: 'Render Tubes',
-      showGrid: 'Show Grid',
-      showAxes: 'Show Axes',
-      showShadows: 'Show Shadows',
-      lineWidth: 'Line Width'
+      title: 'Paramètres de prévisualisation',
+      renderTubes: "Tubes d'enduit",
+      showGrid: 'Montrer le gri',
     }
   },
   fileUpload: {
-    title: 'Upload GCODE Files',
-    dragDrop: 'Drag and drop your GCODE files here',
-    or: 'or',
-    browse: 'Browse files'
+    title: 'Télécharger les fichiers GCODE',
+    dragDrop: 'Glissez et déposez vos fichiers GCODE ici',
+    or: 'ou',
+    browse: 'Parcourir les fichiers'
   },
   printSummary: {
-    title: "Print Summary",
-    compileGcode: "Compile G-code",
-    totalPrintTime: "Total print time: {time}",
-    totalCost: "Total cost: {cost}",
+    title: "Imprimer le résumé",
+    compileGcode: "Compiler le code G",
+    totalPrintTime: "Durée totale de l'impression: {time}",
+    totalCost: "Coût totalt: {cost}",
     printer: {
-      single: "Printer: {name}",
-      multiple: "Printers: {names}"
+      single: "Imprimante: {name}",
+      multiple: "Imprimantes: {names}"
     },
     filament: {
       slot: "Filament {number}",
@@ -45,14 +42,14 @@ const translations: TranslationKeys = {
   },
   fileList: {
     quantity: {
-      label: "Print Quantity"
+      label: "Quantité d'impression"
     },
-    dragHandle: "Drag to reorder",
+    dragHandle: "Faire glisser pour réorganiser",
     fileInfo: {
-      file: "File: {name}",
-      filamentUsage: "Filament Usage:",
-      printTime: "Print Time:",
-      totalTime: "Total Time:"
+      file: "Fichier: {name}",
+      filamentUsage: "Utilisation du filament:",
+      printTime: "Temps d'impression:",
+      totalTime: "Durée totale:"
     }
   }
 };

@@ -17,9 +17,6 @@ const translations: TranslationKeys = {
       title: 'Preview Settings',
       renderTubes: 'Render Tubes',
       showGrid: 'Show Grid',
-      showAxes: 'Show Axes',
-      showShadows: 'Show Shadows',
-      lineWidth: 'Line Width'
     }
   },
   fileUpload: {

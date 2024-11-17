@@ -1,7 +1,9 @@
+import { useTranslations } from '../i18n/utils.ts';
 import type { GCodeFile } from '../types/gcode';
 import { formatTime } from './format-helpers.ts';
 
-export function generateFileItemHTML(file: GCodeFile): string {
+export function generateFileItemHTML(file: GCodeFile, lang: string): string {
+  const { t } = useTranslations(lang);
   return `
     <div
       class="file-item bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 transform"
