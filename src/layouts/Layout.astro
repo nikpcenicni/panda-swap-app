@@ -32,6 +32,17 @@ const pageTitle = title.includes(t('app.title')) ? title : `${title} | ${t('app.
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     
+    <!-- Add these script tags to your HTML head -->
+    <script src="https://cdn.jsdelivr.net/npm/@nanostores/persistent@0.9.1/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nanostores@0.9.5/index.js"></script>
+
+    <!-- If you need specific file formats support -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three-gcode-loader@1.0.0/GCodeLoader.js"></script>
+
+    <!-- For sortable functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    
     <!-- Theme Script -->
     <script is:inline>
       // Handle theme initialization
