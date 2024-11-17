@@ -17,6 +17,7 @@ export type TranslationKeys = {
         title: string;
         renderTubes: string;
         buildArea: string;
+        showPreview: string;
       };
       gcode: {
         title: string;
@@ -28,7 +29,6 @@ export type TranslationKeys = {
         showTotalCost: string;
         showPrinterInfo: string;
         compactMode: string;
-        showPreview: string;
       };
     };
     error: {

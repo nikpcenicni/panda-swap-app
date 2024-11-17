@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: Settings = {
   preview: {
     renderTubes: true,
     buildArea: true,
-    showPreview: true
+    showPreview: true,
   },
   display: {
     emptyFilaments: false,

@@ -1,4 +1,5 @@
 import { filesStore, type GCodeFile } from '../../store/file-store.ts';
+import { settingsStore } from '../../store/settings-store.ts';
 import { processFiles } from '../../utils/FileUpload/file-handlers.ts';
 import { UI_CONFIG } from '../../types/gcode.ts';
 import { initializeGCodePreview } from '../../utils/FileUpload/gcode-preview-handlers.ts';
@@ -17,25 +18,28 @@ export function setupFileUploadHandlers(): void {
   function updateFileList(files: readonly GCodeFile[]): void {
     if (!fileList || !initialUpload || !bottomUpload) return;
     
+    const settings = settingsStore.get();
+    const showPreview = settings.preview?.showPreview ?? false;
+    
     fileList.classList.toggle('hidden', files.length === 0);
     initialUpload.classList.toggle('hidden', files.length > 0);
     bottomUpload.classList.toggle('hidden', files.length === 0);
     
+    // Pass the preview setting to generateFileItemHTML
     fileList.innerHTML = files
-      .map((file) => generateFileItemHTML(file))
+      .map((file) => generateFileItemHTML(file, showPreview))
       .join('');
     
-    document.querySelectorAll('.file-item').forEach(fileItem => {
-      const fileId = fileItem.getAttribute('data-file-id');
-      const file = files.find(f => f.id === fileId);
-      const container = fileItem.querySelector('.gcode-preview-container');
-      if (file && container) {
-        initializeGCodePreview(container as HTMLElement, file).catch(console.error);
-      }
-    });
-    
-    if (files.length > 0) {
-      initializeSortable(fileList);
+    // Only initialize previews if preview is enabled
+    if (showPreview) {
+      document.querySelectorAll('.file-item').forEach(fileItem => {
+        const fileId = fileItem.getAttribute('data-file-id');
+        const file = files.find(f => f.id === fileId);
+        const container = fileItem.querySelector('.gcode-preview-container');
+        if (file && container) {
+          initializeGCodePreview(container as HTMLElement, file).catch(console.error);
+        }
+      });
     }
   }
 
@@ -74,6 +78,12 @@ export function setupFileUploadHandlers(): void {
     const dropzoneActiveClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10'];
 
     filesStore.subscribe(updateFileList);
+    
+    // Subscribe to settings changes
+    settingsStore.subscribe(() => {
+      const files = filesStore.get();
+      updateFileList(files);
+    });
 
     document.addEventListener('astro:page-load', () => {
       setupTranslationObservers();

@@ -3,7 +3,7 @@ import { useTranslations } from '../../i18n/utils';
 import type { GCodeFile } from '../../types/gcode';
 import { formatTime } from '../format-handlers';
 
-export function generateFileItemHTML(file: GCodeFile): string {
+export function generateFileItemHTML(file: GCodeFile, showPreview: boolean = false): string {
   const currentLang = languageStore.get();
   const { t } = useTranslations(currentLang);
 
@@ -70,7 +70,11 @@ export function generateFileItemHTML(file: GCodeFile): string {
           </button>
         </div>
       </div>
-      <div class="gcode-preview-container"></div>
+      ${showPreview ? `
+            <div class="gcode-preview-container">
+              <!-- Preview container will be initialized if preview is enabled -->
+            </div>
+          ` : ''}
       <div class="mt-4">
         <h4 
           class="font-medium text-gray-700 dark:text-gray-300 mb-2" 

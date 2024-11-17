@@ -21,6 +21,7 @@ const translations: TranslationKeys = {
       title: 'Paramètres de prévisualisation',
       renderTubes: "Tubes d'enduit",
       buildArea: 'Show Build Volume',
+      showPreview: 'Avant-première',
     },
     gcode: {
       title: 'Paramètres du code GC',
@@ -32,7 +33,6 @@ const translations: TranslationKeys = {
       showTotalCost: 'Afficher le coût total',
       showPrinterInfo: "Afficher les informations sur l'imprimante",
       compactMode: 'Mode compact',
-      showPreview: 'Avant-première'
     }
   },
   fileUpload: {
@@ -55,7 +55,7 @@ const translations: TranslationKeys = {
     filament: {
       slot: "Filament {number}",
       weight: "{amount}g",
-      cost: "${amount}"
+      cost: "${amount}",
     }
   },
   fileList: {

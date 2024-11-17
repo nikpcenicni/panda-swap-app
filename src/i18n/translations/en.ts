@@ -21,6 +21,7 @@ const translations: TranslationKeys = {
       title: 'Preview Settings',
       renderTubes: 'Show as Tubes',
       buildArea: 'Show Build Volume',
+      showPreview: 'Show Preview',
     },
     gcode: {
       title: 'GCode Settings',
@@ -32,7 +33,6 @@ const translations: TranslationKeys = {
       showTotalCost: 'Show Total Cost',
       showPrinterInfo: 'Show Printer Info',
       compactMode: 'Compact Mode',
-      showPreview: 'Show Preview'
     }
   },
   fileUpload: {
