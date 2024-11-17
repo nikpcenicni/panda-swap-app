@@ -1,0 +1,37 @@
+---
+interface Props {
+  currentLang: string;
+  label: string;
+}
+
+const { currentLang, label } = Astro.props;
+---
+
+<button
+  id="language-select"
+  type="button"
+  class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out flex items-center space-x-1"
+  aria-label={label}
+  data-current-lang={currentLang}
+>
+  <span class="text-sm uppercase font-medium">{currentLang}</span>
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+  </svg>
+</button>
+
+<script>
+  import { languageStore } from '../../store/language-store.ts';
+
+  // Update button text when language changes
+  const button = document.getElementById('language-select');
+  if (button) {
+    languageStore.subscribe(lang => {
+      const span = button.querySelector('span');
+      if (span) {
+        span.textContent = lang.toUpperCase();
+      }
+      button.setAttribute('data-current-lang', lang);
+    });
+  }
+</script>

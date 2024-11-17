@@ -1,40 +1,34 @@
-# Astro Starter Kit: Basics
 
-```sh
-npm create astro@latest -- --template basics
+# Panda Swap App
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+Open Source GCode merger to be used with Panda Swap
+
+
+
+## Demo
+
+Insert gif or link to demo
+
+
+## 👀 Want to learn more?
+
+[Documentation](https://linktodocumentation)
+
+
+## Running Locally
+
+Begin by cloning this repo and installing dependencies
+```bash
+  git clone https://github.com/nikpcenicni/panda-swap-app.git | cd panda-swap-app
+  npm install
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+To run this project run 
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+  npm run dev
 ```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
 
 ## 🧞 Commands
 
@@ -49,6 +43,89 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## 🚀 Project Structure
+
+Inside this project, you'll see the following folders and files:
+
+```text
+/
+├── public/
+│   └── favicon.svg
+├── src/
+│   ├── components/
+│   │   └── FileUpload/
+│   │   │   └── ErrorMessage.astro
+│   │   │   └── FileList.astro
+│   │   │   └── FileUploadCard.astro
+│   │   │   └── fileUploadHandlers
+│   │   │   └── UploadZone.astro
+│   │   └── LanguageSelector/
+│   │   │   └── LanguageButton.astro
+│   │   │   └── LanguageDropDown.astro
+│   │   │   └── LanguageSelector
+│   │   └── PrintSummary/
+│   │   │   └── CompileButton.astro
+│   │   │   └── filamentDisplayHandlers.ts
+│   │   │   └── FilamentUsage.astro
+│   │   │   └── PrinterInfo.astro
+│   │   │   └── PrintSummaryCard.astro
+│   │   │   └── printSummaryHandlers.ts
+│   │   └── Settings/
+│   │   │   └── Settings.astro
+│   │   │   └── SettingsIcon.ts
+│   │   │   └── FilamentUsage.astro
+│   │   │   └── SettingsSection.astro
+│   │   │   └── TextareaSetting.astro
+│   │   │   └── ToggleSetting.astro
+│   │   └── ThemeToggle/
+│   │   │   └── ThemeIcons.astro
+│   │   │   └── themeToggle.ts
+│   │   └── Card.astro
+│   │   └── Header.astro
+│   │   └── Card.astro
+│   ├── i18n/
+│   │   └── translations/
+│   │   └── config.ts
+│   │   └── utils.ts
+│   ├── layouts/
+│   │   └── Layout.astro
+│   ├── pages/
+│   │   └── index.astro
+│   ├── store/
+│   │   └── file-store.ts
+│   │   └── language-store.ts
+│   │   └── settings-store.ts
+│   │   └── theme-store.ts
+│   ├── types/
+│   │   └── gcode.ts
+│   │   └── language.ts
+│   │   └── settings.ts
+│   │   └── theme.ts
+│   ├── utils/
+│   │   └── FileUpload/
+│   │   │   └── filament-calculator.ts
+│   │   │   └── file-handlers.ts
+│   │   │   └── file-list-template.ts
+│   │   │   └── gcode-parser.ts
+│   │   │   └── gcode-preview-handlers.ts
+│   │   │   └── sortable-handlers.ts
+│   │   └── i18n/
+│   │   │   └── language-handlers.ts
+│   │   │   └── translations-handlers.ts
+│   │   └── PrintSummary/
+│   │   │   └── gcode-handlers.ts
+│   │   └── format-handlers.ts
+│   │   └── settings-handlers.ts
+│   │   └── theme-handlers.ts
+│   └── utils/
+│       └── index.astro
+└── package.json
+```
+
+
+## License
+
+[APACHE 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+

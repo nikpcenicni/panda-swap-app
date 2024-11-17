@@ -1,17 +1,66 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import FileUpload from '../components/FileUpload.astro';
-import Summary from '../components/Summary.astro';
+import FileUploadCard from '../components/FileUpload/FileUploadCard.astro';
+import PrintSummaryCard from '../components/PrintSummary/PrintSummaryCard.astro';
+import { getCurrentLanguage, useTranslations } from '../i18n/utils';
+
+// Initialize translations
+const { t } = useTranslations(getCurrentLanguage());
 
 // This would normally come from your data store/backend
-const files: { id: string; name: string; quantity: number; metadata: { plateName: string; colors: Array<{ color: string; weight: number; }>; totalTime: number; modelImage?: string; }; }[] = [];
+const files: { 
+  id: string; 
+  name: string; 
+  quantity: number; 
+  metadata: { 
+    plateName: string; 
+    colors: Array<{ color: string; weight: number; }>; 
+    totalTime: number; 
+    modelImage?: string; 
+  }; 
+}[] = [];
+
+// Pre-compute initial translations
+const pageTranslations = {
+  title: t('app.title'),
+  description: t('app.description')
+};
+
 ---
 
-<Layout title="GCODE Manager">
+<Layout 
+  title={pageTranslations.title}
+  description={pageTranslations.description}
+>
   <Header />
+  
   <main class="container mx-auto px-4 py-8 space-y-8">
-    <FileUpload />
-    <Summary files={files} />
+    <div class="space-y-8">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100" data-i18n="app.welcome">
+        {t('app.welcome')}
+      </h1>
+      <PrintSummaryCard />
+      <FileUploadCard />
+    </div>
   </main>
 </Layout>
+
+<script>
+  import { getCurrentLanguage, useTranslations } from '../i18n/utils';
+
+  // Initialize translations
+  function initializeTranslations() {
+    const { t } = useTranslations(getCurrentLanguage());
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      const key = element.getAttribute('data-i18n');
+      if (key) element.textContent = t(key);
+    });
+  }
+
+  // Update translations when language changes
+  window.addEventListener('language-change', initializeTranslations);
+
+  // Initialize translations on page load
+  document.addEventListener('astro:page-load', initializeTranslations);
+</script>

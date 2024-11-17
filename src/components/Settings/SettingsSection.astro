@@ -1,0 +1,14 @@
+---
+interface Props {
+  title: string;
+  group: string;
+}
+
+const { title, group } = Astro.props;
+---
+<div class="settings-section py-3 first:pt-0 last:pb-0" data-section={group}>
+  <h3 class="text-lg font-medium mb-2" data-i18n={`settings.${group}.title`}>{title}</h3>
+  <div class="space-y-2">
+    <slot />
+  </div>
+</div>

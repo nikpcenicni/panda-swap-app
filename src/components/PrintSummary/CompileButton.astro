@@ -1,0 +1,18 @@
+---
+interface Props {
+  disabled: boolean;
+}
+
+const { disabled } = Astro.props;
+---
+
+<button
+  id="compile-button"
+  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+  disabled={disabled}
+>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8l4-2 4 2V6z" clip-rule="evenodd"/>
+  </svg>
+  <span data-i18n="printSummary.compileGcode"></span>
+</button>

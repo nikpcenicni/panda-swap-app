@@ -1,0 +1,178 @@
+---
+import SettingsIcon from './SettingsIcon.astro';
+import SettingsSection from './SettingsSection.astro';
+import ToggleSetting from './ToggleSetting.astro';
+import TextareaSetting from './TextareaSetting.astro';
+import { settingsStore } from '../../store/settings-store';
+import { useTranslations, getCurrentLanguage } from '../../i18n/utils';
+
+const initialSettings = settingsStore.get();
+const currentLang = getCurrentLanguage();
+const { t } = useTranslations(currentLang);
+---
+
+<div class="relative" id="settings-menu">
+  <button
+    type="button"
+    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 ease-in-out"
+    aria-label={t('common.settings')}
+    id="settings-button"
+  >
+    <SettingsIcon />
+  </button>
+
+  <div
+    id="settings-panel"
+    class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 hidden z-50 border border-gray-200 dark:border-gray-700"
+  >
+    <div class="space-y-4">
+      <SettingsSection title={t('settings.display.title')} group="display">
+        <ToggleSetting
+          label={t('settings.display.emptyFilaments')}
+          name="emptyFilaments"
+          group="display"
+          checked={initialSettings.display.emptyFilaments}
+        />
+        <ToggleSetting
+          label={t('settings.display.showTotalCost')}
+          name="showTotalCost"
+          group="display"
+          checked={initialSettings.display.showTotalCost}
+        />
+        <ToggleSetting
+          label={t('settings.display.showPrinterInfo')}
+          name="showPrinterInfo"
+          group="display"
+          checked={initialSettings.display.showPrinterInfo}
+        />
+        <ToggleSetting
+          label={t('settings.display.compactMode')}
+          name="compactMode"
+          group="display"
+          checked={initialSettings.display.compactMode}
+        />
+      </SettingsSection>
+
+
+      <SettingsSection title={t('settings.gcode.title')} group="gcode">
+        <TextareaSetting
+          label={t('settings.gcode.buildPlateSwap')}
+          name="buildPlateSwap"
+          group="gcode"
+          value={initialSettings.gcode.buildPlateSwap}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.preview.title')} group="preview">
+        <ToggleSetting
+          label={t('settings.preview.renderTubes')}
+          name="renderTubes"
+          group="preview"
+          checked={initialSettings.preview.renderTubes}
+        />
+        <ToggleSetting
+          label={t('settings.preview.buildArea')}
+          name="buildArea"
+          group="preview"
+          checked={initialSettings.preview.buildArea}
+        />
+        <ToggleSetting
+        label={t('settings.preview.showPreview')}
+        name="showPreview"
+        group="preview"
+        checked={initialSettings.preview.showPreview}
+      />
+      </SettingsSection>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { initSettings, settingsStore, type Settings } from '../../store/settings-store';
+  import { handleSettingChange, updateSettingsUI } from '../../utils/settings-handlers.ts';
+  import { useTranslations } from '../../i18n/utils';
+
+  function updateTranslations() {
+    const settingsPanel = document.getElementById('settings-panel');
+    if (!settingsPanel) return;
+
+    const { t } = useTranslations();
+
+    // Update all elements with data-i18n attributes
+    settingsPanel.querySelectorAll('[data-i18n]').forEach((element) => {
+      const key = element.getAttribute('data-i18n');
+      if (key) {
+        element.textContent = t(key);
+      }
+    });
+  }
+
+  function setupSettingsMenu() {
+    const settingsButton = document.getElementById('settings-button');
+    const settingsPanel = document.getElementById('settings-panel');
+    const settingsMenu = document.getElementById('settings-menu');
+
+    if (!settingsButton || !settingsPanel || !settingsMenu) return;
+
+    function togglePanel(event: Event) {
+      event.stopPropagation();
+      if(settingsPanel)
+      settingsPanel.classList.toggle('hidden');
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if(settingsPanel)
+      if (!settingsPanel.contains(event.target as Node)) {
+        settingsPanel.classList.add('hidden');
+      }
+    }
+
+    // Handle settings changes
+    settingsPanel.addEventListener('change', (event) => {
+      const target = event.target as HTMLInputElement;
+      if (!target.dataset.settingsGroup) return;
+      handleSettingChange(target, target.dataset.settingsGroup as keyof Settings);
+    });
+
+    // Handle textarea input
+    settingsPanel.addEventListener('input', (event) => {
+      const target = event.target as HTMLTextAreaElement;
+      if (!target.dataset.settingsGroup || target.tagName !== 'TEXTAREA') return;
+      handleSettingChange(target, target.dataset.settingsGroup as keyof Settings);
+    });
+
+    // Subscribe to settings changes
+    settingsStore.subscribe((settings) => {
+      updateSettingsUI(settingsPanel, settings);
+    });
+
+    // Listen for language changes
+    window.addEventListener('language-change', () => {
+      updateTranslations();
+    });
+
+    // Initial translation update
+    updateTranslations();
+
+    // Add event listeners
+    settingsButton.addEventListener('click', togglePanel);
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      settingsButton.removeEventListener('click', togglePanel);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }
+
+  // Initialize settings
+  document.addEventListener('astro:page-load', () => {
+    initSettings();
+    setupSettingsMenu();
+  });
+
+  if (document.readyState === 'complete') {
+    setupSettingsMenu();
+  } else {
+    window.addEventListener('load', setupSettingsMenu);
+  }
+</script>

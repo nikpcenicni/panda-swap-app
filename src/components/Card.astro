@@ -1,15 +1,29 @@
 ---
+// Card.astro
 interface Props {
-  title: string;
+  title?: string;
   className?: string;
+  'data-i18n-key'?: string;  // Add this to the Props interface
 }
 
-const { title, className = "" } = Astro.props;
+const { 
+  title, 
+  className = '', 
+  'data-i18n-key': dataI18nKey  // Destructure with alias
+} = Astro.props;
 ---
-
-<div class={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${className}`}>
+<div class={`bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden ${className}`}>
+  {title && (
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 
+        class="text-lg font-medium text-gray-900 dark:text-white"
+        data-i18n-key={dataI18nKey}
+      >
+        {title}
+      </h3>
+    </div>
+  )}
   <div class="p-6">
-    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{title}</h3>
     <slot />
   </div>
 </div>

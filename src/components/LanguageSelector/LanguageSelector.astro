@@ -1,0 +1,72 @@
+---
+import { getServerSideLanguage } from '../../store/language-store';
+import { useTranslations, getAvailableLanguages } from '../../i18n/utils';
+import LanguageButton from './LanguageButton.astro';
+import LanguageDropdown from './LanguageDropDown.astro';
+
+// Use server-side safe language getter
+const currentLang = getServerSideLanguage();
+const { t } = useTranslations(currentLang);
+const availableLanguages = getAvailableLanguages();
+---
+<div class="relative" id="language-selector-root">
+  <LanguageButton
+    currentLang={currentLang}
+    label={t('common.language')}
+  />
+  <LanguageDropdown
+    languages={availableLanguages}
+    currentLang={currentLang}
+  />
+</div>
+
+<script>
+  import { languageStore } from '../../store/language-store.ts';
+  import { setupLanguageHandlers } from '../../utils/i18n/language-handlers.ts';
+  import { setLanguage } from '../../i18n/utils';
+
+  function updateContent() {
+    const root = document.getElementById('language-selector-root');
+    if (!root) return;
+
+    // Update data attributes for reactive content
+    root.setAttribute('data-current-lang', languageStore.get());
+  }
+
+  // Initialize language handlers
+  setupLanguageHandlers(
+    'language-select',
+    'language-dropdown',
+    async (lang) => {
+      // Set the new language
+      setLanguage(lang);
+      
+      // Try to update content without reload first
+      const elements = document.querySelectorAll('[data-i18n-key]');
+      if (elements.length > 0) {
+        // If there are translatable elements, trigger a page reload
+        location.reload();
+      } else {
+        // If no translatable elements, just update the language selector
+        updateContent();
+        
+        // Dispatch event for other components that might need to update
+        window.dispatchEvent(
+          new CustomEvent('language-change', { 
+            detail: { language: lang } 
+          })
+        );
+      }
+    }
+  );
+
+  // Set up initial state
+  document.addEventListener('astro:page-load', () => {
+    updateContent();
+  });
+
+  // Listen for language changes
+  languageStore.subscribe(() => {
+    updateContent();
+  });
+</script>
