@@ -26,36 +26,6 @@ const { t } = useTranslations(currentLang);
     class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 hidden z-50 border border-gray-200 dark:border-gray-700"
   >
     <div class="space-y-4">
-      <SettingsSection title={t('settings.preview.title')} group="preview">
-        <ToggleSetting
-          label={t('settings.preview.renderTubes')}
-          name="renderTubes"
-          group="preview"
-          checked={initialSettings.preview.renderTubes}
-        />
-        <ToggleSetting
-          label={t('settings.preview.buildArea')}
-          name="buildArea"
-          group="preview"
-          checked={initialSettings.preview.buildArea}
-        />
-        <ToggleSetting
-        label={t('settings.display.showPreview')}
-        name="showPreview"
-        group="display"
-        checked={initialSettings.preview.showPreview}
-      />
-      </SettingsSection>
-
-      <SettingsSection title={t('settings.gcode.title')} group="gcode">
-        <TextareaSetting
-          label={t('settings.gcode.buildPlateSwap')}
-          name="buildPlateSwap"
-          group="gcode"
-          value={initialSettings.gcode.buildPlateSwap}
-        />
-      </SettingsSection>
-
       <SettingsSection title={t('settings.display.title')} group="display">
         <ToggleSetting
           label={t('settings.display.emptyFilaments')}
@@ -81,6 +51,37 @@ const { t } = useTranslations(currentLang);
           group="display"
           checked={initialSettings.display.compactMode}
         />
+      </SettingsSection>
+
+
+      <SettingsSection title={t('settings.gcode.title')} group="gcode">
+        <TextareaSetting
+          label={t('settings.gcode.buildPlateSwap')}
+          name="buildPlateSwap"
+          group="gcode"
+          value={initialSettings.gcode.buildPlateSwap}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.preview.title')} group="preview">
+        <ToggleSetting
+          label={t('settings.preview.renderTubes')}
+          name="renderTubes"
+          group="preview"
+          checked={initialSettings.preview.renderTubes}
+        />
+        <ToggleSetting
+          label={t('settings.preview.buildArea')}
+          name="buildArea"
+          group="preview"
+          checked={initialSettings.preview.buildArea}
+        />
+        <ToggleSetting
+        label={t('settings.display.showPreview')}
+        name="showPreview"
+        group="display"
+        checked={initialSettings.preview.showPreview}
+      />
       </SettingsSection>
     </div>
   </div>
