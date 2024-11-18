@@ -13,7 +13,7 @@ Open Source GCode merger to be used with Panda Swap
 
 ## 👀 Want to learn more?
 
-[Documentation](https://linktodocumentation)
+[Documentation](https://github.com/nikpcenicni/panda-swap-app/wiki)
 
 
 ## Running Locally
