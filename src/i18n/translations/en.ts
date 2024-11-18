@@ -7,7 +7,6 @@ const translations: TranslationKeys = {
     welcome: "Welcome to Panda Swap",
   },
   common: {
-    title: 'Panda Swap',
     toggleTheme: 'Toggle theme',
     settings: 'Settings',
     language: 'Language'

@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { t } = useTranslations(getCurrentLanguage());
-const { title = t('common.title') } = Astro.props;
+const { title = t('app.title') } = Astro.props;
 ---
 
 <header class="w-full bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -17,7 +17,7 @@ const { title = t('common.title') } = Astro.props;
     <div class="flex justify-between items-center">
       <h1 
       class="text-2xl font-bold text-gray-900 dark:text-white"
-      data-i18n-key={title === t('common.title') ? 'common.title' : null}
+      data-i18n-key={title === t('app.title') ? 'app.title' : null}
     >
       {title}
     </h1>

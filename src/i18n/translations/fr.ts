@@ -7,7 +7,6 @@ const translations: TranslationKeys = {
     welcome: "Bienvenue à Échange de pandas",
   },
   common: {
-    title: 'Échange de pandas',
     toggleTheme: 'Toggle theme',
     settings: 'Paramètres',
     language: 'Langue'

@@ -7,7 +7,6 @@ export type TranslationKeys = {
       welcome:  string;
     };
     common: {
-      title: string;
       toggleTheme: string;
       settings: string;
       language: string;
