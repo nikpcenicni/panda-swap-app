@@ -16,10 +16,10 @@ const { languages, currentLang } = Astro.props;
       data-lang={code}
       class:list={[
         'block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700',
-        {
-          'text-gray-900 dark:text-white font-medium': code === currentLang,
-          'text-gray-700 dark:text-gray-300': code !== currentLang,
-        },
+        'relative',
+        code === currentLang 
+          ? 'text-gray-900 dark:text-white font-medium bg-gray-50 dark:bg-gray-700' 
+          : 'text-gray-700 dark:text-gray-300'
       ]}
     >
       <span class="uppercase font-medium">{code}</span>

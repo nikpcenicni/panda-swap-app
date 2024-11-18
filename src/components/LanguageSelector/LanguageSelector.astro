@@ -1,11 +1,11 @@
 ---
 import { getServerSideLanguage } from '../../store/language-store';
-import { useTranslations, getAvailableLanguages } from '../../i18n/utils';
+import { useTranslations, getAvailableLanguages, getCurrentLanguage } from '../../i18n/utils';
 import LanguageButton from './LanguageButton.astro';
 import LanguageDropdown from './LanguageDropDown.astro';
 
 // Use server-side safe language getter
-const currentLang = getServerSideLanguage();
+const currentLang = getCurrentLanguage();
 const { t } = useTranslations(currentLang);
 const availableLanguages = getAvailableLanguages();
 ---
@@ -26,12 +26,25 @@ const availableLanguages = getAvailableLanguages();
   import { setLanguage } from '../../i18n/utils';
 
   function updateContent() {
-    const root = document.getElementById('language-selector-root');
-    if (!root) return;
-
-    // Update data attributes for reactive content
-    root.setAttribute('data-current-lang', languageStore.get());
-  }
+  const root = document.getElementById('language-selector-root');
+  if (!root) return;
+  
+  const currentLang = languageStore.get();
+  root.setAttribute('data-current-lang', currentLang);
+  
+  // Update dropdown button highlighting
+  const buttons = document.querySelectorAll('#language-dropdown button');
+  buttons.forEach(button => {
+    const lang = button.getAttribute('data-lang');
+    if (lang === currentLang) {
+      button.classList.add('text-gray-900', 'dark:text-white', 'font-medium', 'bg-gray-50', 'dark:bg-gray-700');
+      button.classList.remove('text-gray-700', 'dark:text-gray-300');
+    } else {
+      button.classList.remove('text-gray-900', 'dark:text-white', 'font-medium', 'bg-gray-50', 'dark:bg-gray-700');
+      button.classList.add('text-gray-700', 'dark:text-gray-300');
+    }
+  });
+}
 
   // Initialize language handlers
   setupLanguageHandlers(
