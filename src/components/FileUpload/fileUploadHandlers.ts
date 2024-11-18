@@ -14,6 +14,8 @@ export function setupFileUploadHandlers(): void {
   const fileList = document.getElementById('file-list');
   const initialUpload = document.getElementById('initial-upload');
   const bottomUpload = document.querySelector('.p-4.space-y-2.border-t');
+  
+  let sortableInstance: any = null; // Store the Sortable instance
 
   function updateFileList(files: readonly GCodeFile[]): void {
     if (!fileList || !initialUpload || !bottomUpload) return;
@@ -29,6 +31,16 @@ export function setupFileUploadHandlers(): void {
     fileList.innerHTML = files
       .map((file) => generateFileItemHTML(file, showPreview))
       .join('');
+    
+    // Destroy existing Sortable instance if it exists
+    if (sortableInstance) {
+      sortableInstance.destroy();
+    }
+    
+    // Reinitialize Sortable if there are files
+    if (files.length > 0) {
+      sortableInstance = initializeSortable(fileList);
+    }
     
     // Only initialize previews if preview is enabled
     if (showPreview) {
@@ -77,21 +89,32 @@ export function setupFileUploadHandlers(): void {
   if (dropzone && fileInput) {
     const dropzoneActiveClasses = ['border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/10'];
 
+    // Clean up existing event listeners before reattaching
+    const cleanup = () => {
+      document.removeEventListener('click', handleDelete);
+      if (sortableInstance) {
+        sortableInstance.destroy();
+      }
+    };
+
+    // Initial setup
     filesStore.subscribe(updateFileList);
-    
-    // Subscribe to settings changes
     settingsStore.subscribe(() => {
       const files = filesStore.get();
       updateFileList(files);
     });
 
+    // Handle page transitions in Astro
     document.addEventListener('astro:page-load', () => {
+      cleanup();
       setupTranslationObservers();
-      if (fileList && filesStore.get().length > 0) {
-        initializeSortable(fileList);
-      }
+      const files = filesStore.get();
+      updateFileList(files);
     });
 
+    document.addEventListener('astro:before-swap', cleanup);
+
+    // Reattach event listeners
     document.addEventListener('click', handleDelete);
 
     document.addEventListener('change', (e: Event) => {
@@ -139,10 +162,6 @@ export function setupFileUploadHandlers(): void {
         await processFiles(target.files, { onError: showError });
         target.value = '';
       }
-    });
-
-    document.addEventListener('astro:before-swap', () => {
-      document.removeEventListener('click', handleDelete);
     });
   }
 }
