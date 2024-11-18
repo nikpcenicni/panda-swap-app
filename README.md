@@ -1,6 +1,6 @@
 
 # Panda Swap App
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nikpcenicni/panda-swap-app/astro.yml)
 
 Open Source GCode merger to be used with Panda Swap
 
@@ -8,7 +8,7 @@ Open Source GCode merger to be used with Panda Swap
 
 ## Demo
 
-Insert gif or link to demo
+[Live Demo](https://nikpcenicni.github.io/panda-swap-app)
 
 
 ## 👀 Want to learn more?
