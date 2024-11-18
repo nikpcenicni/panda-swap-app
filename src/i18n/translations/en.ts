@@ -18,7 +18,7 @@ const translations: TranslationKeys = {
   },
   settings: {
     preview: {
-      title: 'Preview Settings',
+      title: 'File Preview Settings',
       renderTubes: 'Show as Tubes',
       buildArea: 'Show Build Volume',
       showPreview: 'Show Preview',
@@ -28,7 +28,7 @@ const translations: TranslationKeys = {
       buildPlateSwap: 'Build Plate Swap GCode'
     },
     display: {
-      title: 'Display Settings',
+      title: 'Print Summary Settings',
       emptyFilaments: 'Unused Filament',
       showTotalCost: 'Show Total Cost',
       showPrinterInfo: 'Show Printer Info',
