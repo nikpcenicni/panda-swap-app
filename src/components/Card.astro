@@ -1,15 +1,14 @@
 ---
-// Card.astro
 interface Props {
   title?: string;
   className?: string;
-  'data-i18n-key'?: string;  // Add this to the Props interface
+  'data-i18n-key'?: string; 
 }
 
 const { 
   title, 
   className = '', 
-  'data-i18n-key': dataI18nKey  // Destructure with alias
+  'data-i18n-key': dataI18nKey 
 } = Astro.props;
 ---
 <div class={`bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden ${className}`}>

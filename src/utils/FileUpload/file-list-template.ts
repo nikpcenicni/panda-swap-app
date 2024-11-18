@@ -77,7 +77,7 @@ export function generateFileItemHTML(file: GCodeFile, showPreview: boolean = fal
           ` : ''}
       <div class="mt-4">
         <h4 
-          class="font-medium text-gray-700 dark:text-gray-300 mb-2" 
+          class="font-medium text-gray-700 dark:text-gray-300 mb-2 break-words whitespace-pre-wrap" 
           data-i18n-key="fileList.fileInfo.file" 
           data-i18n-params='{"name":"${file.metadata.plateName}"}'
         >
