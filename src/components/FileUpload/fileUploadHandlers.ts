@@ -73,7 +73,7 @@ export function setupFileUploadHandlers(): void {
       e.preventDefault();
       const fileId = deleteButton.getAttribute('data-file-id');
       
-      if (fileId && confirm('Are you sure you want to delete this file?')) {
+      // if (fileId && confirm('Are you sure you want to delete this file?')) {
         try {
           const files = filesStore.get();
           const updatedFiles = files.filter(file => file.id !== fileId);
@@ -82,7 +82,7 @@ export function setupFileUploadHandlers(): void {
           console.error('Error deleting file:', error);
           showError('Failed to delete file');
         }
-      }
+      // }
     }
   }
 

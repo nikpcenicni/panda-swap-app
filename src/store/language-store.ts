@@ -2,7 +2,7 @@
 import { atom } from 'nanostores';
 import { LANG_STORAGE_KEY } from '../i18n/config';
 
-export type SupportedLanguage = 'en' | 'es' | 'fr' | 'de' | 'zh' | 'ja' | 'ko' | 'ru' | 'pt' | 'it';
+export type SupportedLanguage = 'en' | 'es' | 'fr' | 'de' | 'zh' | 'ja' | 'ko' | 'uk' | 'pt' | 'it';
 
 function getInitialLanguage(): SupportedLanguage {
   if (typeof window === 'undefined') {
@@ -24,7 +24,7 @@ function getInitialLanguage(): SupportedLanguage {
 }
 
 function isValidLanguage(lang: string): lang is SupportedLanguage {
-  const validLanguages: SupportedLanguage[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'ru', 'pt', 'it'];
+  const validLanguages: SupportedLanguage[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'uk', 'pt', 'it'];
   return validLanguages.includes(lang as SupportedLanguage);
 }
 

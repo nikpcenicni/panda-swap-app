@@ -9,7 +9,7 @@ const { languages, currentLang } = Astro.props;
 
 <div
   id="language-dropdown"
-  class="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl hidden"
+  class="absolute right-0 mt-2 py-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl hidden z-50 border border-gray-200 dark:border-gray-700"
 >
   {Object.entries(languages).map(([code, name]) => (
     <button
@@ -27,3 +27,39 @@ const { languages, currentLang } = Astro.props;
     </button>
   ))}
 </div>
+
+<style>
+  /* Ensure the dropdown is always on top */
+  #language-dropdown {
+    isolation: isolate;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  /* Add a solid background color with slight opacity */
+  #language-dropdown {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* Dark mode background */
+  :global(.dark) #language-dropdown {
+    background-color: rgba(31, 41, 55, 0.95);
+  }
+  
+  /* Optional: Add a subtle animation */
+  #language-dropdown {
+    transform-origin: top right;
+    animation: dropdown 0.2s ease-out;
+  }
+  
+  @keyframes dropdown {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

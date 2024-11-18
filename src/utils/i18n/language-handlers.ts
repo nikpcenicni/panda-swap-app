@@ -73,7 +73,7 @@ export function setupLanguageHandlers(
 
 // Utility function to validate language codes
 function isValidLanguage(lang: string): boolean {
-  const validLanguages: SupportedLanguage[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'ru', 'pt', 'it'];
+  const validLanguages: SupportedLanguage[] = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'uk', 'pt', 'it'];
   return validLanguages.includes(lang as SupportedLanguage);
 }
 

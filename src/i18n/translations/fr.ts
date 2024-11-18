@@ -2,36 +2,35 @@ import type { TranslationKeys } from '../config';
 
 const translations: TranslationKeys = {
   app: {
-    title: "Échange de pandas",
-    description: "Mise en file d'attente des fichiers d'impression pour Échange de pandas",
-    welcome: "Bienvenue à Échange de pandas",
+    title: "Panda Swap",
+    description: "Mettez vos fichiers d'impression en file d'attente pour Panda Swap",
+    welcome: "Bienvenue à Panda Swap",
   },
   common: {
-    title: 'Échange de pandas',
     toggleTheme: 'Toggle theme',
     settings: 'Paramètres',
     language: 'Langue'
   },
   error: {
-    invalidFile: "Invalid File",
-    uploadFailed: "Upload Failed",
+    invalidFile: "Fichier invalide",
+    uploadFailed: "Échec du téléchargement",
   },
   settings: {
     preview: {
-      title: 'Paramètres de prévisualisation',
+      title: 'Aperçu du fichier',
       renderTubes: "Tubes d'enduit",
-      buildArea: 'Show Build Volume',
+      buildArea: 'Volume de construction',
       showPreview: 'Avant-première',
     },
     gcode: {
-      title: 'Paramètres du code GC',
-      buildPlateSwap: 'Construire la plaque échanger le code GCode'
+      title: 'Paramètres GCODE',
+      buildPlateSwap: 'Construire la plaque Échanger le GCODE'
     },
     display: {
-      title: "Paramètres d'affichage",
-      emptyFilaments: 'Cacher les filaments vides',
-      showTotalCost: 'Afficher le coût total',
-      showPrinterInfo: "Afficher les informations sur l'imprimante",
+      title: 'Imprimer le résumé',
+      emptyFilaments: 'Filament inutilisé',
+      showTotalCost: 'Coût total',
+      showPrinterInfo: "Informations sur l'imprimante",
       compactMode: 'Mode compact',
     }
   },
@@ -40,14 +39,14 @@ const translations: TranslationKeys = {
     dragDrop: 'Glissez et déposez vos fichiers GCODE ici',
     or: 'ou',
     browse: 'Parcourir les fichiers',
-    fileListLabel: 'File List',
-    inputLabel: 'File Input',
+    fileListLabel: 'Liste des fichiers',
+    inputLabel: 'Entrée du fichier',
   },
   printSummary: {
     title: "Imprimer le résumé",
-    compileGcode: "Compiler le code G",
+    compileGcode: "Compiler",
     totalPrintTime: "Durée totale de l'impression: {time}",
-    totalCost: "Coût totalt: {cost}",
+    totalCost: "Coût total: {cost}",
     printer: {
       single: "Imprimante: {name}",
       multiple: "Imprimantes: {names}"
@@ -55,7 +54,7 @@ const translations: TranslationKeys = {
     filament: {
       slot: "Filament {number}",
       weight: "{amount}g",
-      cost: "${amount}",
+      cost: "${amount}"
     }
   },
   fileList: {
@@ -69,7 +68,7 @@ const translations: TranslationKeys = {
       printTime: "Temps d'impression:",
       totalTime: "Durée totale:"
     },
-    deleteFile: "Delete File"
+    deleteFile: "Supprimer le fichier"
   }
 };
 
