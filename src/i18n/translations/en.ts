@@ -17,20 +17,20 @@ const translations: TranslationKeys = {
   },
   settings: {
     preview: {
-      title: 'File Preview Settings',
-      renderTubes: 'Show as Tubes',
-      buildArea: 'Show Build Volume',
-      showPreview: 'Show Preview',
+      title: 'File Preview',
+      renderTubes: 'Render Tubes',
+      buildArea: 'Build Volume',
+      showPreview: 'Preview',
     },
     gcode: {
-      title: 'GCode Settings',
-      buildPlateSwap: 'Build Plate Swap GCode'
+      title: 'GCODE Settings',
+      buildPlateSwap: 'Build Plate Swap GCODE'
     },
     display: {
-      title: 'Print Summary Settings',
+      title: 'Print Summary',
       emptyFilaments: 'Unused Filament',
-      showTotalCost: 'Show Total Cost',
-      showPrinterInfo: 'Show Printer Info',
+      showTotalCost: 'Total Cost',
+      showPrinterInfo: 'Printer Info',
       compactMode: 'Compact Mode',
     }
   },
@@ -44,7 +44,7 @@ const translations: TranslationKeys = {
   },
   printSummary: {
     title: "Print Summary",
-    compileGcode: "Compile G-code",
+    compileGcode: "Compile",
     totalPrintTime: "Total print time: {time}",
     totalCost: "Total cost: {cost}",
     printer: {

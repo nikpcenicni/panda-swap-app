@@ -80,7 +80,7 @@ export const languageNames: Record<string, string> = {
   'zh': '中文',
   'ja': '日本語',
   'ko': '한국어',
-  'ru': 'Русский',
+  'uk': "Українська",
   'pt': 'Português',
   'it': 'Italiano'
 };
